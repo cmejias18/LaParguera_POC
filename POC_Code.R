@@ -1,12 +1,13 @@
 
 #### 1. Import libraries to be used. #####
-library(naniar)
-library(tidyverse)
-library(dplyr)
-library(lubridate)
-library(patchwork)
+
 library(rstudioapi)
 library(ggmap)
+library(tidyverse)
+library(lubridate)
+library(naniar)
+
+library(patchwork)
 library(rgdal)
 library(raster)
 library(ggplot2)
@@ -24,7 +25,7 @@ library(gt)
 library(plotly)
 library(rstatix)
 #library(ggstatplot)
-library(devtools)
+#library(devtools)
 
 
 #### 2. Insert Data set, Convert Sampling Date column from character to Date format, Rename Columns, Filter sites of interest #############
@@ -71,12 +72,15 @@ cols <- c("VL" = '#023858', "AB" = '#0570b0', "NQ" = '#74a9cf', "BB" = '#74c476'
 # cols3 <- c("VL" = '#016571', "AB" = '#80cdc1', "NQ" = '#dfc27d', "BB" = '#a6611a') #terra
 # cols4 <- c("VL" = '#081d58', "AB" = '#225ea8', "NQ" = '#41b6c4', "BB" = '#c7e9b4') #yellow
 cols5 <- c("VL" = '#053061', "AB" = '#4393c3', "NQ" = '#f4a582', "BB" = '#b2162b') #diverging
-shapesx <- c("VL" = '21', "AB" = '22', "NQ" = '23', "BB" = '24')
+smbls <- c("VL" = '21', "AB" = '22', "NQ" = '23', "BB" = '24')
 
 
 
 dataMap <- data2 %>% 
-  dplyr::filter(Site =="VL") %>% 
+  dplyr::filter(Site =="VL"|
+                  Site =="AB"|
+                  Site == "BB"|
+                  Site == "NQ") %>% 
   subset(Date > "2018-01-01" & Date < "2019-12-31") %>% 
   replace_with_na_all(condition=~.x==-999)
 
@@ -113,26 +117,17 @@ ggmap(LPmapzoom) +
   ylab("Latitude")+
   xlab("Longitude")+
   geom_point(dataMapZoom, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, size=5, stroke = 2), size = 10, color="black", show.legend = FALSE)+
+  
   scale_shape_manual(values=c(21,24,23), 
-                     breaks = c("BB","NQ", "AB"), 
-                     labels = c("Acidification Buoy", "Enrique", "Bio Bay"))+ 
+                     breaks = c("BB","NQ","AB"), 
+                     labels = c("Bio Bay", "Enrique", "Acidification Buoy"))+ 
   scale_fill_manual(values=cols5, 
                     breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
   
-  geom_text_repel(aes(x = -67.0510, y = 17.9540),
-                  label = "AB", fill = "#636363", color = "white", fontface = "bold",
-                  min.segment.length = 0, segment.size = 1, segment.colour= "gray", alpha = 1, 
-                  size = 10, direction = "both", force= 2, nudge_x = -0.01, nudge_y = 0, stat = "unique")+
-  
-  geom_text_repel(aes(x = -67.0504, y = 17.9550),
-                  label = "NQ", fill = "#636363", color = "white", fontface = "bold",
-                  min.segment.length = 0, segment.size = 1, segment.colour= "gray", alpha = 1, 
-                  size = 10, direction = "both", force= 2, nudge_x = 0, nudge_y = 0.01, stat = "unique")+
-  
-  geom_text_repel(aes(x = -67.0142, y = 17.9720),
-                  label = "BB", fill = "#636363", color = "white", fontface = "bold",
-                  min.segment.length = 0, segment.size = 1, segment.colour= "gray", alpha = 1,
-                  size = 10, direction = "both", force= 2, nudge_x = 0, nudge_y = -0.01, stat = "unique")
+  annotate("text", x = -67.0510, y = 17.9520, label= "AB", colour="white", fontface="bold", size=10)+
+  annotate("text", x = -67.0504, y = 17.9570, label= "NQ", colour="white", fontface="bold", size=10)+
+  annotate("text", x = -67.0142, y = 17.9710, label= "BB", colour="white", fontface="bold", size=10)
+
 
 ggmap(LPmap) +
   theme_classic()+
@@ -148,37 +143,40 @@ ggmap(LPmap) +
   scale_x_continuous(limits = c(-67.12, -66.95), breaks = seq(-67.10, -66.95, by = 0.04)) +
   ylab("Latitude")+
   xlab("Longitude")+
-  geom_point(dataMap, mapping=aes(x= Lon, y = Lat, shape=Site,  fill=Site, stroke = 1), size= 20, color="white", show.legend = FALSE)+
-  scale_shape_manual(values=22, 
-                     breaks = "VL", 
-                     labels = "Veril")+
-  scale_fill_manual(values="#053061")+
-  #breaks = "Veril"
-  geom_text_repel(aes(x = -67.0213, y = 17.8702), 
-                  label = "VL",color = "white", fontface = "bold", 
+  geom_point(dataMap, mapping=aes(x= Lon, y = Lat, shape=Site,  fill=Site, stroke = 1), size= 4, color="white", show.legend = FALSE)+
+  
+  scale_shape_manual(values=c(21,22,24,23), 
+                     breaks = c("BB","VL", "NQ","AB"), 
+                     labels = c("Bio Bay", "Veril", "Enrique", "Acidification Buoy"))+ 
+  scale_fill_manual(values=cols5, 
+                    breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
+  
+  geom_text_repel(aes(x = -67.0213, y = 17.8702),
+                  label = "VL",color = "white", fontface = "bold",
                   segment.size = 1, segment.colour = "gray", alpha = 1,
-                  size = 20, direction = "both", force= 10, nudge_x = 0, nudge_y = -0.01, stat = "unique")
+                  size = 10, direction = "both", force= 10, nudge_x = 0, nudge_y = -0.01, stat = "unique")+
+
+  geom_text_repel(aes(x = -67.0510, y = 17.9540),
+                 label = "AB", fill = "#636363", color = "white", fontface = "bold",
+                 segment.size = 1, segment.colour= "gray", alpha = 1,
+                 size = 10, direction = "both", force= 10, nudge_x = -0.01, nudge_y = 0, stat = "unique")+
   
-  # geom_text_repel(aes(x = -67.0510, y = 17.9540),
-  #                 label = "AB", fill = "#636363", color = "white", fontface = "bold",
-  #                 segment.size = 1, segment.colour= "gray", alpha = 1, 
-  #                 size = 10, direction = "both", force= 10, nudge_x = -0.01, nudge_y = 0, stat = "unique")+
-  # 
-  # geom_text_repel(aes(x = -67.0504, y = 17.9550),
-  #                 label = "NQ", fill = "#636363", color = "white", fontface = "bold",
-  #                 segment.size = 1, segment.colour= "gray", alpha = 1, 
-  #                 size = 10, direction = "both", force= 10, nudge_x = 0, nudge_y = 0.01, stat = "unique")+
-  # 
-  # geom_text_repel(aes(x = -67.0142, y = 17.9720),
-  #                 label = "BB", fill = "#636363", color = "white", fontface = "bold",
-  #                 segment.size = 1, segment.colour= "gray", alpha = 1, 
-  #                 size = 10, direction = "both", force= 10, nudge_x = 0, nudge_y = -0.01, stat = "unique") 
+  geom_text_repel(aes(x = -67.0504, y = 17.9550),
+                  label = "NQ", fill = "#636363", color = "white", fontface = "bold",
+                  segment.size = 1, segment.colour= "gray", alpha = 1,
+                  size = 10, direction = "both", force= 10, nudge_x = 0, nudge_y = 0.01, stat = "unique")+
+
+  geom_text_repel(aes(x = -67.0142, y = 17.9720),
+                label = "BB", fill = "#636363", color = "white", fontface = "bold",
+                segment.size = 1, segment.colour= "gray", alpha = 1,
+                size = 10, direction = "both", force= 10, nudge_x = 0, nudge_y = -0.01, stat = "unique")
   
-  #guides(shape=guide_legend(override.aes=list(shape=c(22,25,24,21), fill=cols5, size = 5)), size = "none")
-  
+  # annotate("text", x = -67.0510, y = 17.9520, label= "AB", colour="white", fontface="bold", size=5)+
+  # annotate("text", x = -67.0504, y = 17.9570, label= "NQ", colour="white", fontface="bold", size=5)+
+  # annotate("text", x = -67.0142, y = 17.9710, label= "BB", colour="white", fontface="bold", size=5)+
+  # annotate("text", x = -67.0213, y = 17.8615, label= "VL", colour="white", fontface="bold", size=10)
 
 
-   
 #### 4. Group by Site and Date, Calculate Average and Std.Dev ########
 
 
