@@ -625,5 +625,5 @@ ggscreeplot(pca)
 fviz_eig(pca)
 
 
-rm(list = setdiff(ls(), "LPmap"))
+
 
