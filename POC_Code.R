@@ -11,7 +11,10 @@ library(ggpubr)
 library(ggbiplot)
 library(patchwork)
 library(gt)
+<<<<<<< HEAD
 library(devtools)
+=======
+>>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
 
 #optional Libraries
 library(factoextra)
@@ -27,9 +30,14 @@ library(rstatix)
 #library(ggstatplot)
 
 
+<<<<<<< HEAD
 
 #### 2. Insert Dataset (.csv), Convert Sampling Date column from character to Date format, Rename Columns, Filter sites of interest, Eliminate parameters that will not be used in the analysis #############
 
+=======
+#### 2. Insert Dataset (.csv), Convert Sampling Date column from character to Date format, Rename Columns, Filter sites of interest, Eliminate parameters that will not be used in the analysis #############
+
+>>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
 data <- read_csv("DB_AnalysisR.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%  
   dplyr::rename(
     Date = "Sampling Date", 
@@ -57,7 +65,11 @@ data <- read_csv("DB_AnalysisR.csv", col_types = cols(`Sampling Date` = col_date
 #### 3. Figure 1: Map & Stations ########
 
 
+<<<<<<< HEAD
 register_google(key = '...')
+=======
+register_google(key = "...")
+>>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
 
 cols5 <- c("VL" = '#053061', "AB" = '#4393c3', "NQ" = '#f4a582', "BB" = '#b2162b') #diverging
 smbls <- c("VL" = '22', "AB" = '23', "NQ" = '24', "BB" = '21')
@@ -489,7 +501,11 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
   labs(
     x = "PC1 (45.5%)", 
     y = "PC2 (18.1%)")+
+<<<<<<< HEAD
   theme_gray()+
+=======
+  theme_classic()+
+>>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
   theme(
     legend.direction = 'horizontal',
     legend.position = 'top',
@@ -663,7 +679,11 @@ PONGraph_Diff <- ggplot()+
     axis.ticks.x = element_blank(),
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size = 18), 
+<<<<<<< HEAD
     legend.position = "none")
+=======
+    legend.position = "none")+
+>>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
   #scale_y_continuous(limits = c(-150, 150))
 
 
