@@ -11,10 +11,6 @@ library(ggpubr)
 library(ggbiplot)
 library(patchwork)
 library(gt)
-<<<<<<< HEAD
-library(devtools)
-=======
->>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
 
 #optional Libraries
 library(factoextra)
@@ -30,14 +26,10 @@ library(rstatix)
 #library(ggstatplot)
 
 
-<<<<<<< HEAD
 
 #### 2. Insert Dataset (.csv), Convert Sampling Date column from character to Date format, Rename Columns, Filter sites of interest, Eliminate parameters that will not be used in the analysis #############
 
-=======
-#### 2. Insert Dataset (.csv), Convert Sampling Date column from character to Date format, Rename Columns, Filter sites of interest, Eliminate parameters that will not be used in the analysis #############
 
->>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
 data <- read_csv("DB_AnalysisR.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%  
   dplyr::rename(
     Date = "Sampling Date", 
@@ -65,11 +57,8 @@ data <- read_csv("DB_AnalysisR.csv", col_types = cols(`Sampling Date` = col_date
 #### 3. Figure 1: Map & Stations ########
 
 
-<<<<<<< HEAD
 register_google(key = '...')
-=======
-register_google(key = "...")
->>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
+
 
 cols5 <- c("VL" = '#053061', "AB" = '#4393c3', "NQ" = '#f4a582', "BB" = '#b2162b') #diverging
 smbls <- c("VL" = '22', "AB" = '23', "NQ" = '24', "BB" = '21')
@@ -93,16 +82,14 @@ LPmap <- get_googlemap(c(lon = -67.04, lat = 17.92),
 
 
 ggmap(LPmap) +
+  geom_rect(aes(xmin = -67.0600, xmax = -67.0000, ymin = 17.9410, ymax = 17.9780), colour = "white", alpha = 0, size = 1)+
   theme_classic()+
   theme(
     axis.title.x = element_text(size = 22),
     axis.text.x = element_text(size = 22),
     axis.title.y = element_text(size = 22), 
-    axis.text.y = element_text(size = 22), 
-    #legend.position = "right", 
-    legend.title = element_blank(), 
-    legend.text = element_text(size=15))+
-  scale_y_continuous(limits = c(17.85, 17.98), breaks = seq(17.85, 17.98, by = 0.04))+
+    axis.text.y = element_text(size = 22))+
+  scale_y_continuous(limits = c(17.85, 17.98), breaks = seq(17.85, 17.97, by = 0.04))+
   scale_x_continuous(limits = c(-67.12, -66.95), breaks = seq(-67.10, -66.95, by = 0.04)) +
   ylab("Latitude")+
   xlab("Longitude")+
@@ -116,7 +103,7 @@ ggmap(LPmap) +
   annotate("text", x = -67.0504, y = 17.9580, label= "NQ", colour="white", fontface="bold", size=6)+
   annotate("text", x = -67.0142, y = 17.9700, label= "BB", colour="white", fontface="bold", size=6)+
   annotate("text", x = -67.0213, y = 17.8655, label= "VL", colour="white", fontface="bold", size=6)
-
+  
 
 #Zoom In Map
 
@@ -141,12 +128,9 @@ ggmap(LPmapzoom) +
     axis.title.x = element_text(size = 22),
     axis.text.x = element_text(size = 22),
     axis.title.y = element_text(size = 22), 
-    axis.text.y = element_text(size = 22), 
-    #legend.position = "right", 
-    legend.title = element_blank(), 
-    legend.text = element_text(size=15))+
-  scale_y_continuous(limits = c(17.95, 17.98), breaks = seq(17.95, 17.98, by = 0.01))+
-  scale_x_continuous(limits = c(-67.055, -67.010), breaks = seq(-67.055, -67.010, by = 0.015)) +
+    axis.text.y = element_text(size = 22))+ 
+  scale_y_continuous(limits = c(17.94, 17.978), breaks = seq(17.94, 17.98, by = 0.01))+
+  scale_x_continuous(limits = c(-67.055, -67.010), breaks = seq(-67.055, -67.010, by = 0.015))+
   ylab("Latitude")+
   xlab("Longitude")+
   geom_point(dataMapZoom, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, size=5, stroke = 2), size = 10, color="black", show.legend = FALSE)+
@@ -158,13 +142,6 @@ ggmap(LPmapzoom) +
   annotate("text", x = -67.0510, y = 17.9520, label= "AB", colour="white", fontface="bold", size=8)+
   annotate("text", x = -67.0504, y = 17.9570, label= "NQ", colour="white", fontface="bold", size=8)+
   annotate("text", x = -67.0142, y = 17.9710, label= "BB", colour="white", fontface="bold", size=8)
-
-
-#Map Inset
-
-LPmap + inset(ggplotGrob(LPmapzoom), xmin = -76.7, xmax = -66.7, ymin = 26, ymax = 35)
-
-
 
 
 
@@ -501,11 +478,7 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
   labs(
     x = "PC1 (45.5%)", 
     y = "PC2 (18.1%)")+
-<<<<<<< HEAD
-  theme_gray()+
-=======
   theme_classic()+
->>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
   theme(
     legend.direction = 'horizontal',
     legend.position = 'top',
@@ -679,11 +652,7 @@ PONGraph_Diff <- ggplot()+
     axis.ticks.x = element_blank(),
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size = 18), 
-<<<<<<< HEAD
     legend.position = "none")
-=======
-    legend.position = "none")+
->>>>>>> 86968c653d5eef0f4a2187d290011dc3e23acdf9
   #scale_y_continuous(limits = c(-150, 150))
 
 
@@ -737,85 +706,86 @@ ggsave("OffsetAnalysis.pdf", OffSet_Plot, width = 12, height = 7)
 
 
 #### 9. Stats: Kruskal & Dunn Test ####
-#ST = tests for Normality
-#KT = tests for detectable differences in parameters between sites (i.e., POC detectably varies between sites)
-#DT = #DT = if there are differences in POC between sites, this tests for detectable differences in POC between every site vs site comparison (i.e., POC_biobay > POC_Enrique, POC_biobay>POC_AB, POC_biobay>POC_veril, and etc.)
+
+library(performance)
 
 
-shapiro.test(data_mean$POC_m)
-shapiro.test(data_mean$PON_m)
-shapiro.test(data_mean$d13C_m)
-shapiro.test(data_mean$d15N_m)
-shapiro.test(data_mean$Temp)
-shapiro.test(data_mean$Sal)
-shapiro.test(data_mean$pH)
+data_mean$Month = substr(data_mean$Date,6,7)
 
-ggdensity(data_mean$POC_m)
-ggdensity(data_mean$PON_m)
-ggdensity(data_mean$d13C_m)
-ggdensity(data_mean$d15N_m)
-ggqqplot(data_mean$d13C_m)
-ggqqplot(data_mean$Temp)
+temp0=aov(Temp~1,data=data_mean) #null model
+temp1=aov(Temp~Site,data=data_mean) #Site as a predictor of Temp
+temp2=aov(Temp~Month,data=data_mean) #Month as a predictor of Temp
+temp3=aov(Temp~Site+Month,data=data_mean) #Site + Month as predictors of Temp
+temp4=aov(Temp~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of Temp
+AIC(temp0,temp1,temp2,temp3,temp4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
+summary(temp3) #Site and Month are a significant predictor of Temp
+check_model(temp3) #model assumptions appear to be mostly okay here
+TukeyHSD(temp3, conf.level=.95) #BB Temp > AB Temp, NQ Temp > AB Temp, VL Temp < AB Temp, VL Temp < BB Temp, VL Temp < NQ Temp
 
-kruskal.test(POC_m~as.factor(Site),data=data_mean) 
-kruskal.test(PON_m~as.factor(Site),data=data_mean)
-kruskal.test(d13C_m~as.factor(Site),data=data_mean)
-kruskal.test(d15N_m~as.factor(Site),data=data_mean)
-kruskal.test(Temp~as.factor(Site),data=data_mean)
-kruskal.test(Sal~as.factor(Site),data=data_mean)
-kruskal.test(pH~as.factor(Site),data=data_mean)
+sal0=aov(Sal~1,data=data_mean) #null model
+sal1=aov(Sal~Site,data=data_mean) #Site as a predictor of sal
+sal2=aov(Sal~Month,data=data_mean) #Month as a predictor of sal
+sal3=aov(Sal~Site+Month,data=data_mean) #Site + Month as predictors of sal
+sal4=aov(Sal~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of sal
+AIC(sal0,sal1,sal2,sal3,sal4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
+summary(sal3) #Site and Month are a significant predictor of sal
+check_model(sal3) #model assumptions appear to be mostly okay here
+TukeyHSD(sal3, conf.level=.95) #BB sal > AB sal, NQ sal > AB sal, VL sal < AB sal, VL sal < BB sal, VL sal < NQ sal
 
-TempDT<-dunnTest(Temp~as.factor(Site),data=data_mean,method="bonferroni") 
-SalDT<-dunnTest(Sal~as.factor(Site),data=data_mean,method="bonferroni") 
-pHDT<-dunnTest(pH~as.factor(Site),data=data_mean,method="bonferroni") 
-POCDT<-dunnTest(POC_m~as.factor(Site),data=data_mean,method="bonferroni") 
-PONDT<-dunnTest(PON_m~as.factor(Site),data=data_mean,method="bonferroni") 
-CIRDT<-dunnTest(d13C_m~as.factor(Site),data=data_mean,method="bonferroni") 
-NIRDT<-dunnTest(d15N_m~as.factor(Site),data=data_mean,method="bonferroni") 
+pH0=aov(pH~1,data=data_mean) #null model
+pH1=aov(pH~Site,data=data_mean) #Site as a predictor of pH
+pH2=aov(pH~Month,data=data_mean) #Month as a predictor of pH
+pH3=aov(pH~Site+Month,data=data_mean) #Site + Month as predictors of pH
+pH4=aov(pH~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of pH
+AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
+summary(pH3) #Site and Month are a significant predictor of pH
+check_model(pH3) #model assumptions appear to be mostly okay here
+TukeyHSD(pH3, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
+
+poc0=aov(POC_m~1,data=data_mean) #null model
+poc1=aov(POC_m~Site,data=data_mean) #Site as a predictor of POC
+poc2=aov(POC_m~Month,data=data_mean) #Month as a predictor of POC
+poc3=aov(POC_m~Site+Month,data=data_mean) #Site + Month as predictors of POC
+poc4=aov(POC_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of POC
+AIC(poc0,poc1,poc2,poc3,poc4) #AIC of all models included, t1 has the lowest AIC and is the best model to fit the data
+summary(poc1) #Site is a significant predictor of POC
+summary(poc2) #Month is not a significant predictor of POC
+check_model(poc1) #model assumptions appear to be mostly okay here
+TukeyHSD(poc1, conf.level=.95) #BB POC > AB POC, NQ POC < BB POC, VL POC < BB POC
+
+PON0=aov(PON_m~1,data=data_mean) #null model
+PON1=aov(PON_m~Site,data=data_mean) #Site as a predictor of PON
+PON2=aov(PON_m~Month,data=data_mean) #Month as a predictor of PON
+PON3=aov(PON_m~Site+Month,data=data_mean) #Site + Month as predictors of PON
+PON4=aov(PON_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of PON
+AIC(PON0,PON1,PON2,PON3,PON4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
+summary(PON3) #Site and Month are a significant predictor of PON
+check_model(PON3) #model assumptions appear to be mostly okay here
+TukeyHSD(PON3, conf.level=.95) #BB PON > AB PON, NQ PON > AB PON, VL PON < AB PON, VL PON < BB PON, VL PON < NQ PON
+
+d13C0=aov(d13C_m~1,data=data_mean) #null model
+d13C1=aov(d13C_m~Site,data=data_mean) #Site as a predictor of d13C
+d13C2=aov(d13C_m~Month,data=data_mean) #Month as a predictor of d13C
+d13C3=aov(d13C_m~Site+Month,data=data_mean) #Site + Month as predictors of d13C
+d13C4=aov(d13C_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d13C
+AIC(d13C0,d13C1,d13C2,d13C3,d13C4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
+summary(d13C3) #Site and Month are a significant predictor of d13C
+check_model(d13C3) #model assumptions appear to be mostly okay here
+TukeyHSD(d13C3, conf.level=.95) #BB d13C > AB d13C, NQ d13C > AB d13C, VL d13C < AB d13C, VL d13C < BB d13C, VL d13C < NQ d13C
+
+d15N0=aov(d15N_m~1,data=data_mean) #null model
+d15N1=aov(d15N_m~Site,data=data_mean) #Site as a predictor of d15N
+d15N2=aov(d15N_m~Month,data=data_mean) #Month as a predictor of d15N
+d15N3=aov(d15N_m~Site+Month,data=data_mean) #Site + Month as predictors of d15N
+d15N4=aov(d15N_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d15N
+AIC(d15N0,d15N1,d15N2,d15N3,d15N4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
+summary(d15N3) #Site and Month are a significant predictor of d15N
+check_model(d15N3) #model assumptions appear to be mostly okay here
+TukeyHSD(d15N3, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N < AB d15N, VL d15N < BB d15N, VL d15N < NQ d15N
 
 
-#Individual Dunn Test Results Table (rounding and organization)
-
-options(scipen=999)
-Temp_p=bind_cols("Comparison"=TempDT$res$Comparison,"Temperature"=round(TempDT$res$P.adj,3))
-Sal_p=bind_cols("Comparison"=SalDT$res$Comparison,"Salinity"=round(SalDT$res$P.adj,3))
-pH_p=bind_cols("Comparison"=pHDT$res$Comparison,"pH"=round(pHDT$res$P.adj,3))
-POC_p=bind_cols("Comparison"=POCDT$res$Comparison,"POC"=round(POCDT$res$P.adj,3))
-PON_p=bind_cols("Comparison"=PONDT$res$Comparison,"PON"=round(PONDT$res$P.adj,3))
-CIR_p=bind_cols("Comparison"=CIRDT$res$Comparison,"13C"=round(CIRDT$res$P.adj,3))
-NIR_p=bind_cols("Comparison"=NIRDT$res$Comparison,"15N"=round(NIRDT$res$P.adj,3))
 
 
-#Merging above data frames
-DN_list <- list(Temp_p, Sal_p, pH_p, POC_p, PON_p, CIR_p, NIR_p) %>% 
-  reduce(full_join, by='Comparison')
 
-write.table(DN_list, file = "DunnTestStats2.csv", sep = ",", quote = FALSE, row.names = F)
 
-DN_list %>% 
-  gt() %>% 
-  #tab_header(
-  #title= ('TITLE')) %>% 
-  # fmt_number(
-  #   columns = 2:8,
-  #   1.000 == ">0.999", 
-  #   0.000 == "<0.001") %>% 
-  opt_align_table_header(align = "left") %>%  
-  cols_label(Comparison = "Sites") %>% 
-  cols_width(
-    Comparison ~ px(100), 
-    Temperature ~ px(100), 
-    Salinity ~ px(100), 
-    pH ~ px(100), 
-    POC ~ px(100), 
-    PON ~ px(100), 
-    '13C' ~ px(100), 
-    '15N' ~ px(100)) %>% 
-  tab_style(
-    style =  
-      cell_text(weight = "bold"),
-    locations = 
-      cells_body(
-        columns = 2:8,
-        rows =  Temperature <0.05)) 
 
