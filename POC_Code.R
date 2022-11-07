@@ -133,7 +133,7 @@ ggmap(LPmapzoom) +
   scale_x_continuous(limits = c(-67.055, -67.010), breaks = seq(-67.055, -67.010, by = 0.015))+
   ylab("Latitude")+
   xlab("Longitude")+
-  geom_point(dataMapZoom, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, size=5, stroke = 2), size = 10, color="black", show.legend = FALSE)+
+  geom_point(dataMapZoom, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, size=5, stroke = 2), size = 10, color="white", show.legend = FALSE)+
   scale_shape_manual(values=c(21,24,23), 
                      breaks = c("BB","NQ","AB"), 
                      labels = c("Bio Bay", "Enrique", "Acidification Buoy"))+ 
@@ -500,214 +500,10 @@ ggscreeplot(pca)
 fviz_eig(pca) #factoextra_package
 
 
-#### 8. Figure 5: Off-set Plots ########
-
-data_mean_wide <- data_mean %>%
-  pivot_wider(id_cols = Date, 
-              names_from = Site,
-              values_from = c(d13C_m, d15N_m, POC_m, PON_m, Temp, Sal, pH)) %>% 
-  mutate(
-    d13C_VL_AB = d13C_m_VL - d13C_m_AB,
-    d13C_VL_NQ = d13C_m_VL - d13C_m_NQ,
-    d13C_VL_BB = d13C_m_VL - d13C_m_BB,
-    d15N_VL_AB = d15N_m_VL - d15N_m_AB,
-    d15N_VL_NQ = d15N_m_VL - d15N_m_NQ,
-    d15N_VL_BB = d15N_m_VL - d15N_m_BB,
-    POC_VL_AB = POC_m_VL - POC_m_AB,
-    POC_VL_NQ = POC_m_VL - POC_m_NQ,
-    POC_VL_BB = POC_m_VL - POC_m_BB,
-    PON_VL_AB = PON_m_VL - PON_m_AB,
-    PON_VL_NQ = PON_m_VL - PON_m_NQ,
-    PON_VL_BB = PON_m_VL - PON_m_BB,
-    Temp_VL_AB = Temp_VL - Temp_AB,
-    Temp_VL_NQ = Temp_VL - Temp_NQ,
-    Temp_VL_BB = Temp_VL - Temp_BB,
-    Sal_VL_AB = Sal_VL - Sal_AB,
-    Sal_VL_NQ = Sal_VL - Sal_NQ,
-    Sal_VL_BB = Sal_VL - Sal_BB,
-    pH_VL_AB = pH_VL - pH_AB,
-    pH_VL_NQ = pH_VL - pH_NQ,
-    pH_VL_BB = pH_VL - pH_BB) %>%
-  group_by(Date) %>%
-  dplyr::summarize(
-    d13C_VL_AB = d13C_m_VL - d13C_m_AB,
-    d13C_VL_NQ = d13C_m_VL - d13C_m_NQ,
-    d13C_VL_BB = d13C_m_VL - d13C_m_BB,
-    d15N_VL_AB = d15N_m_VL - d15N_m_AB,
-    d15N_VL_NQ = d15N_m_VL - d15N_m_NQ,
-    d15N_VL_BB = d15N_m_VL - d15N_m_BB,
-    POC_VL_AB = POC_m_VL - POC_m_AB,
-    POC_VL_NQ = POC_m_VL - POC_m_NQ,
-    POC_VL_BB = POC_m_VL - POC_m_BB,
-    PON_VL_AB = PON_m_VL - PON_m_AB,
-    PON_VL_NQ = PON_m_VL - PON_m_NQ,
-    PON_VL_BB = PON_m_VL - PON_m_BB,
-    Temp_VL_AB = Temp_VL - Temp_AB,
-    Temp_VL_NQ = Temp_VL - Temp_NQ,
-    Temp_VL_BB = Temp_VL - Temp_BB,
-    Sal_VL_AB = Sal_VL - Sal_AB,
-    Sal_VL_NQ = Sal_VL - Sal_NQ,
-    Sal_VL_BB = Sal_VL - Sal_BB,
-    pH_VL_AB = pH_VL - pH_AB,
-    pH_VL_NQ = pH_VL - pH_NQ,
-    pH_VL_BB = pH_VL - pH_BB)
-
-
-TempGraph_Diff <- ggplot()+
-  ggtitle("A")+
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = Temp_VL_AB, colour="VL_AB"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = Temp_VL_NQ, colour="VL_NQ"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = Temp_VL_BB, colour="VL_BB"), size=3) + 
-  geom_hline(yintercept=0) + 
-  scale_color_manual(values = c('VL_AB' = '#053061', "VL_NQ" = '#f4a582', "VL_BB" = '#b2162b'))+
-  theme_classic() + 
-  theme(legend.position = "none") +
-  labs(x = NULL, y = "Temperature (°C)") +
-  scale_x_date(limits = as.Date(c("2018-07-01", "2019-06-30"))) +
-  #scale_y_continuous(limits = c(-2, 2))+
-  theme(
-    axis.text.x = element_blank(), 
-    axis.title.x = element_blank(), 
-    axis.ticks.x = element_blank(),
-    axis.title.y = element_text(size=18),
-    axis.text.y = element_text(size = 18), 
-    legend.position = "none")
-
-
-SalGraph_Diff <- ggplot()+
-  ggtitle("B")+
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = Sal_VL_AB,colour="VL_AB"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = Sal_VL_NQ,colour="VL_NQ"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = Sal_VL_BB,colour="VL_BB"), size=3) + 
-  geom_hline(yintercept=0) + 
-  scale_color_manual(values = c('VL_AB' = '#053061', "VL_NQ" = '#f4a582', "VL_BB" = '#b2162b'))+
-  theme_classic() + 
-  theme(legend.position = "none") +
-  labs(x = NULL, y = "Salinity (PSU)") +
-  scale_x_date(limits = as.Date(c("2018-07-01", "2019-06-30"))) +
-  #scale_y_continuous(limits = c(-1, 1))+
-  theme(
-    axis.text.x = element_blank(), 
-    axis.title.x = element_blank(), 
-    axis.ticks.x = element_blank(),
-    axis.title.y = element_text(size = 18),
-    axis.text.y = element_text(size = 18), 
-    legend.position = "none")
-  #scale_y_continuous(limits = c(-1, 1), breaks = seq(-1,1, by = 1))
-
-
-pHGraph_Diff <- ggplot()+
-  ggtitle("C")+
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = pH_VL_AB, colour ="VL_AB"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = pH_VL_NQ, colour ="VL_NQ"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = pH_VL_BB, colour ="VL_BB"), size=3) + 
-  geom_hline(yintercept=0) + 
-  scale_color_manual(values = c('VL_AB' = '#053061', "VL_NQ" = '#f4a582', "VL_BB" = '#b2162b'))+
-  theme_classic() + 
-  labs(x = NULL, y = expression(paste("pH "[T]))) + 
-  scale_x_date(limits = as.Date(c("2018-07-01", "2019-06-30")))+
-  #scale_y_continuous(limits = c(-0.5,0.5))+
-  theme(
-    axis.title.y = element_text(size=18),
-    axis.text.y = element_text(size = 18),
-    axis.text.x = element_text(size = 13), 
-    legend.position = "none")
-
-
-POCGraph_Diff <- ggplot() +
-  ggtitle("D")+
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = POC_VL_AB, colour="VL_AB"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = POC_VL_NQ, colour="VL_NQ"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = POC_VL_BB, colour="VL_BB"), size=3) + 
-  geom_hline(yintercept=0) + 
-  scale_color_manual(values = c('VL_AB' = '#053061', "VL_NQ" = '#f4a582', "VL_BB" = '#b2162b'))+
-  theme_classic() + 
-  theme(legend.position = "none") +
-  labs(x = NULL, y = expression(paste("POC ", (mg/m^3)))) +
-  scale_x_date(limits = as.Date(c("2018-07-01", "2019-06-30"))) +
-  #scale_y_continuous(limits = c(-800, 200), breaks = seq(-800,200, by = 200)) +
-  theme(
-    axis.text.x = element_blank(), 
-    axis.title.x = element_blank(), 
-    axis.ticks.x = element_blank(),
-    axis.title.y = element_text(size=18),
-    axis.text.y = element_text(size = 18), 
-    legend.position = "none") 
-
-
-PONGraph_Diff <- ggplot()+
-  ggtitle("E")+
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = PON_VL_AB,colour="VL_AB"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = PON_VL_NQ,colour="VL_NQ"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x = Date, y = PON_VL_BB,colour="VL_BB"), size=3) + 
-  geom_hline(yintercept=0) + 
-  scale_color_manual(values = c('VL_AB' = '#053061', "VL_NQ" = '#f4a582', "VL_BB" = '#b2162b'))+
-  theme_classic() + 
-  theme(legend.position = "none") +
-  labs(x = NULL, y = expression(paste("PON ", (mg/m^3)))) +
-  scale_x_date(limits = as.Date(c("2018-07-01", "2019-06-30"))) +
-  theme(
-    axis.text.x = element_blank(), 
-    axis.title.x = element_blank(), 
-    axis.ticks.x = element_blank(),
-    axis.title.y = element_text(size=18),
-    axis.text.y = element_text(size = 18), 
-    legend.position = "none")
-  #scale_y_continuous(limits = c(-150, 150))
-
-
-CIRGraph_Diff <- ggplot(data_mean_wide) +
-  ggtitle("F")+
-  geom_point(aes(x = Date, y = d13C_VL_AB, colour="VL_AB"), size=3) +
-  geom_point(aes(x = Date, y = d13C_VL_NQ, colour="VL_NQ"), size=3) + 
-  geom_point(aes(x = Date, y = d13C_VL_BB, colour="VL_BB"), size=3) + 
-  geom_hline(yintercept=0) +
-  scale_color_manual(values = c('VL_AB' = '#053061', "VL_NQ" = '#f4a582', "VL_BB" = '#b2162b'))+
-  theme_classic() + 
-  labs(x = NULL, y = expression(paste(delta^{13}, "C (\u2030)"))) +
-  scale_x_date(limits = as.Date(c("2018-07-01", "2019-06-30"))) +
-  #scale_y_continuous(limits = c(-20, 20))+
-  theme(
-    axis.text.x = element_blank(), 
-    axis.title.x = element_blank(), 
-    axis.ticks.x = element_blank(),
-    axis.title.y = element_text(size=18),
-    axis.text.y = element_text(size = 18), 
-    legend.position = "none")
-
-
-NIRGraph_Diff <- ggplot() +
-  ggtitle("G")+
-  geom_point(data_mean_wide, mapping=aes(x=Date, y = d15N_VL_AB, colour="VL_AB"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x=Date, y = d15N_VL_NQ, colour="VL_NQ"), size=3) + 
-  geom_point(data_mean_wide, mapping=aes(x=Date, y = d15N_VL_BB, colour="VL_BB"), size=3) +
-  geom_hline(yintercept=0) + 
-  scale_color_manual(values = c('VL_AB' = '#053061', "VL_NQ" = '#f4a582', "VL_BB" = '#b2162b'))+
-  theme_classic() + 
-  labs(x = NULL, y = expression(paste(delta^{15}, "N (\u2030)"))) +
-  scale_x_date(limits = as.Date(c("2018-07-01", "2019-06-30")))+
-  #scale_y_continuous(limits = c(-10, 10))+
-  theme(
-    axis.title.y = element_text(size=18),
-    axis.text.y = element_text(size = 18),
-    axis.text.x = element_text(size = 13),
-    legend.position = "none")
-
-
-OffSet_Plot<-((TempGraph_Diff/SalGraph_Diff/pHGraph_Diff)|(POCGraph_Diff/PONGraph_Diff/CIRGraph_Diff/NIRGraph_Diff)) + 
-  plot_layout(guides='collect') &
-  theme(legend.position = "bottom",
-        legend.title = element_text(size=16), 
-        legend.text = element_text(size=16))
-  
-OffSet_Plot
-
-ggsave("OffsetAnalysis.pdf", OffSet_Plot, width = 12, height = 7)
-
-
-#### 9. Stats: Kruskal & Dunn Test ####
+#### 8. Stats: ANOVA ####
 
 library(performance)
+library(see)
 
 
 data_mean$Month = substr(data_mean$Date,6,7)
@@ -738,8 +534,10 @@ pH2=aov(pH~Month,data=data_mean) #Month as a predictor of pH
 pH3=aov(pH~Site+Month,data=data_mean) #Site + Month as predictors of pH
 pH4=aov(pH~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of pH
 AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(pH3) #Site and Month are a significant predictor of pH
-check_model(pH3) #model assumptions appear to be mostly okay here
+summary(pH2)#Site and Month are a significant predictor of pH
+summary(pH3)
+summary(pH4)
+check_model(pH2) #model assumptions appear to be mostly okay here
 TukeyHSD(pH3, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
 
 poc0=aov(POC_m~1,data=data_mean) #null model
@@ -749,7 +547,8 @@ poc3=aov(POC_m~Site+Month,data=data_mean) #Site + Month as predictors of POC
 poc4=aov(POC_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of POC
 AIC(poc0,poc1,poc2,poc3,poc4) #AIC of all models included, t1 has the lowest AIC and is the best model to fit the data
 summary(poc1) #Site is a significant predictor of POC
-summary(poc2) #Month is not a significant predictor of POC
+summary(poc2)#Month is not a significant predictor of POC
+#summary(poc4)
 check_model(poc1) #model assumptions appear to be mostly okay here
 TukeyHSD(poc1, conf.level=.95) #BB POC > AB POC, NQ POC < BB POC, VL POC < BB POC
 
@@ -759,9 +558,9 @@ PON2=aov(PON_m~Month,data=data_mean) #Month as a predictor of PON
 PON3=aov(PON_m~Site+Month,data=data_mean) #Site + Month as predictors of PON
 PON4=aov(PON_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of PON
 AIC(PON0,PON1,PON2,PON3,PON4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(PON3) #Site and Month are a significant predictor of PON
-check_model(PON3) #model assumptions appear to be mostly okay here
-TukeyHSD(PON3, conf.level=.95) #BB PON > AB PON, NQ PON > AB PON, VL PON < AB PON, VL PON < BB PON, VL PON < NQ PON
+summary(PON1) #Site and Month are a significant predictor of PON
+check_model(PON1) #model assumptions appear to be mostly okay here
+TukeyHSD(PON1, conf.level=.95) #BB PON > AB PON, NQ PON > AB PON, VL PON < AB PON, VL PON < BB PON, VL PON < NQ PON
 
 d13C0=aov(d13C_m~1,data=data_mean) #null model
 d13C1=aov(d13C_m~Site,data=data_mean) #Site as a predictor of d13C
@@ -769,9 +568,9 @@ d13C2=aov(d13C_m~Month,data=data_mean) #Month as a predictor of d13C
 d13C3=aov(d13C_m~Site+Month,data=data_mean) #Site + Month as predictors of d13C
 d13C4=aov(d13C_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d13C
 AIC(d13C0,d13C1,d13C2,d13C3,d13C4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(d13C3) #Site and Month are a significant predictor of d13C
-check_model(d13C3) #model assumptions appear to be mostly okay here
-TukeyHSD(d13C3, conf.level=.95) #BB d13C > AB d13C, NQ d13C > AB d13C, VL d13C < AB d13C, VL d13C < BB d13C, VL d13C < NQ d13C
+summary(d13C1) #Site and Month are a significant predictor of d13C
+check_model(d13C1) #model assumptions appear to be mostly okay here
+TukeyHSD(d13C1, conf.level=.95) #BB d13C > AB d13C, NQ d13C > AB d13C, VL d13C < AB d13C, VL d13C < BB d13C, VL d13C < NQ d13C
 
 d15N0=aov(d15N_m~1,data=data_mean) #null model
 d15N1=aov(d15N_m~Site,data=data_mean) #Site as a predictor of d15N
@@ -779,9 +578,9 @@ d15N2=aov(d15N_m~Month,data=data_mean) #Month as a predictor of d15N
 d15N3=aov(d15N_m~Site+Month,data=data_mean) #Site + Month as predictors of d15N
 d15N4=aov(d15N_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d15N
 AIC(d15N0,d15N1,d15N2,d15N3,d15N4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(d15N3) #Site and Month are a significant predictor of d15N
-check_model(d15N3) #model assumptions appear to be mostly okay here
-TukeyHSD(d15N3, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N < AB d15N, VL d15N < BB d15N, VL d15N < NQ d15N
+summary(d15N4) #Site and Month are a significant predictor of d15N
+check_model(d15N4) #model assumptions appear to be mostly okay here
+TukeyHSD(d15N4, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N < AB d15N, VL d15N < BB d15N, VL d15N < NQ d15N
 
 
 
