@@ -129,7 +129,7 @@ ggmap(LPmapzoom) +
     axis.text.x = element_text(size = 22),
     axis.title.y = element_text(size = 22), 
     axis.text.y = element_text(size = 22))+ 
-  scale_y_continuous(limits = c(17.94, 17.978), breaks = seq(17.94, 17.98, by = 0.01))+
+  scale_y_continuous(limits = c(17.941, 17.978), breaks = seq(17.94, 17.97, by = 0.010))+
   scale_x_continuous(limits = c(-67.055, -67.010), breaks = seq(-67.055, -67.010, by = 0.015))+
   ylab("Latitude")+
   xlab("Longitude")+
@@ -534,11 +534,9 @@ pH2=aov(pH~Month,data=data_mean) #Month as a predictor of pH
 pH3=aov(pH~Site+Month,data=data_mean) #Site + Month as predictors of pH
 pH4=aov(pH~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of pH
 AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(pH2)#Site and Month are a significant predictor of pH
-summary(pH3)
-summary(pH4)
-check_model(pH2) #model assumptions appear to be mostly okay here
-TukeyHSD(pH3, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
+summary(pH4)#Site and Month are a significant predictor of pH
+check_model(pH4) #model assumptions appear to be mostly okay here
+TukeyHSD(pH4, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
 
 poc0=aov(POC_m~1,data=data_mean) #null model
 poc1=aov(POC_m~Site,data=data_mean) #Site as a predictor of POC
@@ -547,8 +545,6 @@ poc3=aov(POC_m~Site+Month,data=data_mean) #Site + Month as predictors of POC
 poc4=aov(POC_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of POC
 AIC(poc0,poc1,poc2,poc3,poc4) #AIC of all models included, t1 has the lowest AIC and is the best model to fit the data
 summary(poc1) #Site is a significant predictor of POC
-summary(poc2)#Month is not a significant predictor of POC
-#summary(poc4)
 check_model(poc1) #model assumptions appear to be mostly okay here
 TukeyHSD(poc1, conf.level=.95) #BB POC > AB POC, NQ POC < BB POC, VL POC < BB POC
 
