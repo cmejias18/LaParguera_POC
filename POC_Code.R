@@ -81,16 +81,18 @@ LPmap <- get_googlemap(c(lon = -67.04, lat = 17.92),
                        force = FALSE)
 
 
-ggmap(LPmap) +
-  geom_rect(aes(xmin = -67.0600, xmax = -67.0000, ymin = 17.9410, ymax = 17.9780), colour = "white", alpha = 0, size = 1)+
+F1<-ggmap(LPmap) +
+  geom_rect(aes(xmin = -67.060, xmax = -67.005, ymin = 17.941, ymax = 17.978), colour = "white", alpha = 0, size = 1)+
   theme_classic()+
+  ggtitle("A")+
   theme(
+    plot.title=element_text(size=20),
     axis.title.x = element_text(size = 22),
     axis.text.x = element_text(size = 22),
     axis.title.y = element_text(size = 22), 
     axis.text.y = element_text(size = 22))+
-  scale_y_continuous(limits = c(17.85, 17.98), breaks = seq(17.85, 17.97, by = 0.04))+
-  scale_x_continuous(limits = c(-67.12, -66.95), breaks = seq(-67.10, -66.95, by = 0.04)) +
+  scale_y_continuous(limits = c(17.86, 17.99), breaks = seq(17.86, 17.99, by = 0.04))+
+  scale_x_continuous(limits = c(-67.09, -66.98), breaks = seq(-67.09, -66.98, by = 0.05)) +
   ylab("Latitude")+
   xlab("Longitude")+
   geom_point(dataMap, mapping=aes(x= Lon, y = Lat, shape=Site,  fill=Site, stroke = 1), size= 4, color="white", show.legend = FALSE)+
@@ -99,11 +101,12 @@ ggmap(LPmap) +
                      labels = c("Bio Bay", "Veril", "Enrique", "Acidification Buoy"))+ 
   scale_fill_manual(values=cols5, 
                     breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
-  annotate("text", x = -67.0510, y = 17.9510, label= "AB", colour="white", fontface="bold", size=6)+
-  annotate("text", x = -67.0504, y = 17.9580, label= "NQ", colour="white", fontface="bold", size=6)+
-  annotate("text", x = -67.0142, y = 17.9700, label= "BB", colour="white", fontface="bold", size=6)+
-  annotate("text", x = -67.0213, y = 17.8655, label= "VL", colour="white", fontface="bold", size=6)
+  annotate("text", x = -67.0510, y = 17.9480, label= "AB", colour="white", fontface="bold", size=8)+
+  annotate("text", x = -67.0504, y = 17.9620, label= "NQ", colour="white", fontface="bold", size=8)+
+  annotate("text", x = -67.0142, y = 17.9670, label= "BB", colour="white", fontface="bold", size=8)+
+  annotate("text", x = -67.0213, y = 17.8635, label= "VL", colour="white", fontface="bold", size=9)
   
+F1+F2
 
 #Zoom In Map
 
@@ -122,26 +125,30 @@ LPmapzoom <- get_googlemap(c(lon = -67.030399, lat = 17.962708),
                        force = FALSE)
 
 
-ggmap(LPmapzoom) +
+F2<-ggmap(LPmapzoom) +
   theme_classic()+
+  ggtitle("B") +
   theme(
+    plot.title=element_text(size=20),
     axis.title.x = element_text(size = 22),
     axis.text.x = element_text(size = 22),
     axis.title.y = element_text(size = 22), 
     axis.text.y = element_text(size = 22))+ 
-  scale_y_continuous(limits = c(17.941, 17.978), breaks = seq(17.94, 17.97, by = 0.010))+
-  scale_x_continuous(limits = c(-67.055, -67.010), breaks = seq(-67.055, -67.010, by = 0.015))+
+  scale_y_continuous(limits = c(17.941, 17.978), breaks = seq(17.94, 17.97, by = 0.01))+
+  scale_x_continuous(limits = c(-67.055, -67.005), breaks = seq(-67.055, -67.010, by = 0.015))+
   ylab("Latitude")+
   xlab("Longitude")+
-  geom_point(dataMapZoom, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, size=5, stroke = 2), size = 10, color="white", show.legend = FALSE)+
+  geom_point(dataMapZoom, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, size=5, stroke = 2), size = 8, color="white", show.legend = FALSE)+
   scale_shape_manual(values=c(21,24,23), 
                      breaks = c("BB","NQ","AB"), 
                      labels = c("Bio Bay", "Enrique", "Acidification Buoy"))+ 
   scale_fill_manual(values=cols5, 
                     breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
-  annotate("text", x = -67.0510, y = 17.9520, label= "AB", colour="white", fontface="bold", size=8)+
-  annotate("text", x = -67.0504, y = 17.9570, label= "NQ", colour="white", fontface="bold", size=8)+
-  annotate("text", x = -67.0142, y = 17.9710, label= "BB", colour="white", fontface="bold", size=8)
+  annotate("text", x = -67.0510, y = 17.9516, label= "AB", colour="white", fontface="bold", size=6)+
+  annotate("text", x = -67.0504, y = 17.9576, label= "NQ", colour="white", fontface="bold", size=6)+
+  annotate("text", x = -67.0142, y = 17.9706, label= "BB", colour="white", fontface="bold", size=6)
+
+F1+F2
 
 
 
@@ -374,6 +381,7 @@ pHBox<-ggplot(data_mean, mapping = aes(Site, pH)) +
 POCBox<-ggplot(data_mean, aes(Site, POC_m)) +  
   ggtitle("D")+
   geom_boxplot(aes(fill = Site))+
+  #geom_errorbar(aes(ymin = POC_m - POC_std, ymax = POC_m + POC_std))+
   geom_jitter(width = 0.1)+
   scale_fill_manual(values=cols5)+
   theme_classic()+
@@ -386,6 +394,7 @@ POCBox<-ggplot(data_mean, aes(Site, POC_m)) +
     axis.line.x = element_blank(),
     axis.ticks.x = element_blank(),
     legend.position = "none")
+POCBox
 
 
 PONBox<-ggplot(data_mean, mapping = aes(Site, PON_m)) +  
@@ -470,10 +479,10 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
                   varname.size=5,
                   labels.size=5, 
                   ellipse = TRUE, 
-                  circle = FALSE, 
+                  circle = FALSE,  
                   label.repel = TRUE)+ 
   geom_point(aes(colour=data_pca$Site, shape=data_pca$Site))+
-  scale_shape_manual(name="Site", values=c(23,21,24, 22))+
+  scale_shape_manual(name="Site", values=c(22,23,24,21))+
   scale_colour_manual(name="Site", values=cols5) +
   labs(
     x = "PC1 (45.5%)", 
@@ -482,8 +491,8 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
   theme(
     legend.direction = 'horizontal',
     legend.position = 'top',
-    legend.text = element_text(size=18),
-    legend.title = element_text(size = 18), 
+    legend.text = element_text(size=20),
+    legend.title = element_text(size = 20), 
     axis.title.y = element_text(size=22),
     axis.text.y = element_text(size = 22, color = "black"),
     axis.title.x = element_text(size=22),
@@ -579,6 +588,12 @@ check_model(d15N4) #model assumptions appear to be mostly okay here
 TukeyHSD(d15N4, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N < AB d15N, VL d15N < BB d15N, VL d15N < NQ d15N
 
 
+library(sjPlot)
+tab_model(d15N0,d15N1,d15N3,d15N4,temp1,temp2,temp3, temp4, sal1, sal2, sal3, sal4,
+          string.pred = "Coeffcient",
+          string.ci = "Conf. Int (95%)",
+          string.p = "p-Value",
+          file="Table_1-Model_Summaries.html")
 
 
 
