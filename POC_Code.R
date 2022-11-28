@@ -30,7 +30,7 @@ library(rstatix)
 #### 2. Insert Dataset (.csv), Convert Sampling Date column from character to Date format, Rename Columns, Filter sites of interest, Eliminate parameters that will not be used in the analysis #############
 
 
-data <- read_csv("DB_AnalysisR.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%  
+data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%  
   dplyr::rename(
     Date = "Sampling Date", 
     Site = "Sample Site", 
@@ -42,13 +42,13 @@ data <- read_csv("DB_AnalysisR.csv", col_types = cols(`Sampling Date` = col_date
     PON = "PON (mg/m3)", 
     Temp = "Temp C (ITS90)", 
     DIC = "DIC (UMOL/KG)",
-    TA = "TA (UMOL/KG)",
-    Chl = "Chl (ug/L)") %>%
+    TA = "TA (UMOL/KG)") %>% 
+    #Chl = "Chl (ug/L)") %>%
   dplyr::filter(Site =="AB"|
            Site == "BB"|
            Site == "NQ"|
            Site == "VL") %>% 
-  dplyr::select(-c(TA, DIC, Chl, NTU, PRCP, Wind,SSH_A)) %>% 
+  dplyr::select(-c(TA, DIC)) %>% 
   subset(Date > "2018-01-01" & Date < "2019-12-31") %>% 
   replace_with_na_all(condition=~.x==-999)
 
@@ -80,9 +80,15 @@ LPmap <- get_googlemap(c(lon = -67.04, lat = 17.92),
                        maptype = "satellite", 
                        force = FALSE)
 
+# LPmap1 <- get_googlemap(c(lon = -67.046801, lat = 17.955173),
+#                        zoom = 12, 
+#                        maptype = "satellite", 
+#                        force = FALSE)
+
 
 F1<-ggmap(LPmap) +
-  geom_rect(aes(xmin = -67.060, xmax = -67.005, ymin = 17.941, ymax = 17.978), colour = "white", alpha = 0, size = 1)+
+  #geom_rect(aes(xmin = -67.055, xmax = -67.008, ymin = 17.945, ymax = 17.978), colour = "white", alpha = 0, size = 1)+ #Rect includes AB, NQ, BB
+  geom_rect(aes(xmin = -67.055, xmax = -67.041, ymin = 17.9460, ymax = 17.9628), colour = "white", alpha = 0, size = 1)+ #RECT includes only AB NQ
   theme_classic()+
   ggtitle("A")+
   theme(
@@ -92,7 +98,7 @@ F1<-ggmap(LPmap) +
     axis.title.y = element_text(size = 22), 
     axis.text.y = element_text(size = 22))+
   scale_y_continuous(limits = c(17.86, 17.99), breaks = seq(17.86, 17.99, by = 0.04))+
-  scale_x_continuous(limits = c(-67.09, -66.98), breaks = seq(-67.09, -66.98, by = 0.05)) +
+  scale_x_continuous(limits = c(-67.10, -66.96), breaks = seq(-67.10, -66.96, by = 0.04)) +
   ylab("Latitude")+
   xlab("Longitude")+
   geom_point(dataMap, mapping=aes(x= Lon, y = Lat, shape=Site,  fill=Site, stroke = 1), size= 4, color="white", show.legend = FALSE)+
@@ -101,19 +107,19 @@ F1<-ggmap(LPmap) +
                      labels = c("Bio Bay", "Veril", "Enrique", "Acidification Buoy"))+ 
   scale_fill_manual(values=cols5, 
                     breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
-  annotate("text", x = -67.0510, y = 17.9480, label= "AB", colour="white", fontface="bold", size=8)+
-  annotate("text", x = -67.0504, y = 17.9620, label= "NQ", colour="white", fontface="bold", size=8)+
-  annotate("text", x = -67.0142, y = 17.9670, label= "BB", colour="white", fontface="bold", size=8)+
+  annotate("text", x = -67.0492, y = 17.9488, label= "AB", colour="white", fontface="bold", size=7)+
+  annotate("text", x = -67.0492, y = 17.9605, label= "NQ", colour="white", fontface="bold", size=7)+
+  annotate("text", x = -67.0142, y = 17.9680, label= "BB", colour="white", fontface="bold", size=7)+
   annotate("text", x = -67.0213, y = 17.8635, label= "VL", colour="white", fontface="bold", size=9)
   
-F1+F2
+F1
 
 #Zoom In Map
 
 
 dataMapZoom <- data %>% 
   dplyr::filter(Site =="AB"|
-                  Site == "BB"|
+                  #Site == "BB"|
                   Site == "NQ") %>% 
   subset(Date > "2018-01-01" & Date < "2019-12-31") %>% 
   replace_with_na_all(condition=~.x==-999)
@@ -134,9 +140,14 @@ F2<-ggmap(LPmapzoom) +
     axis.text.x = element_text(size = 22),
     axis.title.y = element_text(size = 22), 
     axis.text.y = element_text(size = 22))+ 
-  scale_y_continuous(limits = c(17.941, 17.978), breaks = seq(17.94, 17.97, by = 0.01))+
-  scale_x_continuous(limits = c(-67.055, -67.005), breaks = seq(-67.055, -67.010, by = 0.015))+
-  ylab("Latitude")+
+  #Original Zoom
+  # scale_y_continuous(limits = c(17.945, 17.978), breaks = seq(17.94, 17.97, by = 0.01))+
+  # scale_x_continuous(limits = c(-67.055, -67.008), breaks = seq(-67.05, -67.00, by = 0.010))+
+  #Zoom for AB & NQ Only 
+  scale_y_continuous(limits = c(17.9460, 17.9628), breaks = seq(17.94, 17.96, by = 0.005))+
+  scale_x_continuous(limits = c(-67.055, -67.041), breaks = seq(-67.05, -67.04, by = 0.005))+
+  #ylab("Latitude")+
+  ylab(NULL)+
   xlab("Longitude")+
   geom_point(dataMapZoom, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, size=5, stroke = 2), size = 8, color="white", show.legend = FALSE)+
   scale_shape_manual(values=c(21,24,23), 
@@ -144,12 +155,13 @@ F2<-ggmap(LPmapzoom) +
                      labels = c("Bio Bay", "Enrique", "Acidification Buoy"))+ 
   scale_fill_manual(values=cols5, 
                     breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
-  annotate("text", x = -67.0510, y = 17.9516, label= "AB", colour="white", fontface="bold", size=6)+
-  annotate("text", x = -67.0504, y = 17.9576, label= "NQ", colour="white", fontface="bold", size=6)+
-  annotate("text", x = -67.0142, y = 17.9706, label= "BB", colour="white", fontface="bold", size=6)
+  annotate("text", x = -67.0510, y = 17.9516, label= "AB", colour="white", fontface="bold", size=10)+
+  annotate("text", x = -67.0504, y = 17.9576, label= "NQ", colour="white", fontface="bold", size=10)
+  #annotate("text", x = -67.0142, y = 17.9706, label= "BB", colour="white", fontface="bold", size=6)
+
+
 
 F1+F2
-
 
 
 #### 4. Group by Site and Date, Calculate Average and Std.Dev ########
@@ -168,6 +180,7 @@ data_mean <- data %>%
             Temp = mean(Temp),
             Sal = mean(Sal), 
             pH = mean(pH), 
+            CN = POC_m/PON_m, 
             Lat = mean(Lat), 
             Lon = mean(Lon))
             
