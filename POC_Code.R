@@ -11,8 +11,6 @@ library(ggpubr)
 library(ggbiplot)
 library(patchwork)
 library(gt)
-
-#optional Libraries
 library(factoextra)
 
 #Pending to eliminate Libraries
@@ -42,8 +40,7 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
     PON = "PON (mg/m3)", 
     Temp = "Temp C (ITS90)", 
     DIC = "DIC (UMOL/KG)",
-    TA = "TA (UMOL/KG)") %>% 
-    #Chl = "Chl (ug/L)") %>%
+    TA = "TA (UMOL/KG)") %>%
   dplyr::filter(Site =="AB"|
            Site == "BB"|
            Site == "NQ"|
@@ -57,10 +54,10 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
 #### 3. Figure 1: Map & Stations ########
 
 
-register_google(key = '...')
+register_google(key = 'AIzaSyBAkWwL25eBEQFJf4n9Rc2sKQbxSAqu7To')
 
 
-cols5 <- c("VL" = '#053061', "AB" = '#4393c3', "NQ" = '#f4a582', "BB" = '#b2162b') #diverging
+cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#4393c3', "VL" = '#053061') #diverging
 smbls <- c("VL" = '22', "AB" = '23', "NQ" = '24', "BB" = '21')
 
 
@@ -101,12 +98,12 @@ F1<-ggmap(LPmap) +
   scale_x_continuous(limits = c(-67.10, -66.96), breaks = seq(-67.10, -66.96, by = 0.04)) +
   ylab("Latitude")+
   xlab("Longitude")+
-  geom_point(dataMap, mapping=aes(x= Lon, y = Lat, shape=Site,  fill=Site, stroke = 1), size= 4, color="white", show.legend = FALSE)+
+  geom_point(dataMap, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, stroke = 1), size= 4, color="white", show.legend = FALSE)+
   scale_shape_manual(values=c(21,22,24,23), 
-                     breaks = c("BB","VL", "NQ","AB"), 
-                     labels = c("Bio Bay", "Veril", "Enrique", "Acidification Buoy"))+ 
+                     breaks = c("BB","VL","NQ","AB"), 
+                     labels = c("Bio Bay","Veril","Enrique","Acidification Buoy"))+ 
   scale_fill_manual(values=cols5, 
-                    breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
+                    breaks = c("Veril","Acidification Buoy","Enrique","Bio Bay"))+
   annotate("text", x = -67.0492, y = 17.9488, label= "AB", colour="white", fontface="bold", size=7)+
   annotate("text", x = -67.0492, y = 17.9605, label= "NQ", colour="white", fontface="bold", size=7)+
   annotate("text", x = -67.0142, y = 17.9680, label= "BB", colour="white", fontface="bold", size=7)+
@@ -183,6 +180,8 @@ data_mean <- data %>%
             CN = POC_m/PON_m, 
             Lat = mean(Lat), 
             Lon = mean(Lon))
+data_mean$Site <- factor(data_mean$Site, level = c("BB", "NQ", "AB", "VL"))
+  
             
 
 #### 5. Figure 2: Timeseries Plot : Graph Mean & STDEV ########
@@ -203,8 +202,7 @@ TempGraph2 <- ggplot(data_mean, aes(x = Date , y = Temp, fill= Site, shape=Site)
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size = 18), 
     axis.line.x = element_blank(),
-    axis.ticks.x = element_blank())+
-  guides(shape= guide_legend(override.aes = list(fill=cols5)), fill = "none")
+    axis.ticks.x = element_blank())
   
 
 SalGraph2 <- ggplot(data_mean, aes(x = Date , y = Sal, fill= Site, shape=Site)) +
@@ -224,8 +222,7 @@ SalGraph2 <- ggplot(data_mean, aes(x = Date , y = Sal, fill= Site, shape=Site)) 
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size=18), 
     axis.line.x = element_blank(),
-    axis.ticks.x = element_blank())+
-  guides(shape=guide_legend(override.aes=list(fill=cols5)), fill="none")
+    axis.ticks.x = element_blank())
 
 
 pHGraph2 <- ggplot(data_mean, aes(x = Date , y = pH, fill=Site, shape = Site)) + 
@@ -243,8 +240,7 @@ pHGraph2 <- ggplot(data_mean, aes(x = Date , y = pH, fill=Site, shape = Site)) +
     axis.text.x = element_text(size=16),
     axis.title.x = element_blank(),
     axis.title.y = element_text(size=18),
-    axis.text.y = element_text(size =18))+
-  guides(shape=guide_legend(override.aes=list(fill=cols5)), fill="none")
+    axis.text.y = element_text(size =18))
 
 
 POCGraph2 <- ggplot(data_mean, aes(x = Date , y = POC_m, fill=Site, shape = Site)) + 
@@ -263,8 +259,7 @@ POCGraph2 <- ggplot(data_mean, aes(x = Date , y = POC_m, fill=Site, shape = Site
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size=18), 
     axis.line.x = element_blank(),
-    axis.ticks.x = element_blank())+
-  guides(shape=guide_legend(override.aes=list(fill=cols5)), fill="none")
+    axis.ticks.x = element_blank())
 
 
 PONGraph2 <- ggplot(data_mean, aes(x = Date , y = PON_m, fill=Site, shape=Site)) + 
@@ -284,8 +279,7 @@ PONGraph2 <- ggplot(data_mean, aes(x = Date , y = PON_m, fill=Site, shape=Site))
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size = 18), 
     axis.line.x = element_blank(),
-    axis.ticks.x = element_blank())+
-  guides(shape=guide_legend(override.aes=list(fill=cols5)), fill="none")
+    axis.ticks.x = element_blank())
 
 
 CIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d13C_m , fill=Site, shape=Site)) +   
@@ -305,8 +299,7 @@ CIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d13C_m , fill=Site, shape=Site
     axis.title.y = element_text(size=18), 
     axis.text.y = element_text(size = 18), 
     axis.line.x = element_blank(),
-    axis.ticks.x = element_blank())+
-  guides(shape=guide_legend(override.aes=list(fill=cols5)), fill="none")
+    axis.ticks.x = element_blank())
  
 
 NIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d15N_m, fill=Site, shape=Site)) + 
@@ -323,8 +316,7 @@ NIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d15N_m, fill=Site, shape=Site)
     axis.text.x = element_text(size=16), 
     axis.title.x = element_blank(), 
     axis.title.y = element_text(size=18),
-    axis.text.y = element_text(size =18))+
-  guides(shape=guide_legend(override.aes=list(fill=cols5)), fill="none")
+    axis.text.y = element_text(size =18))
 
 
 TimeseriesPlot<-((TempGraph2/SalGraph2/pHGraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2)) + 
@@ -338,10 +330,8 @@ TimeseriesPlot
 ggsave("ParameterTimeSeries_Final.pdf", TimeseriesPlot, width = 12, height = 7)
 
 
-#### 6. Figure 3: Parameter Gradient (BoxPlot) Box Plot ("O" in Odata_mean corresponds to "Ordered" for the boxplot station order) ########
+#### 6. Figure 3: Parameter Gradient (BoxPlot) Box Plot
 
-
-data_mean$Site<-factor(data_mean$Site, c("BB", "NQ", "AB", "VL"))
 
 TempBox<-ggplot(data_mean, mapping = aes(Site, Temp)) +  
   ggtitle("A")+
@@ -407,7 +397,6 @@ POCBox<-ggplot(data_mean, aes(Site, POC_m)) +
     axis.line.x = element_blank(),
     axis.ticks.x = element_blank(),
     legend.position = "none")
-POCBox
 
 
 PONBox<-ggplot(data_mean, mapping = aes(Site, PON_m)) +  
@@ -479,7 +468,7 @@ data_pca <- data %>%
     Temp = mean(Temp),
     Sal = mean(Sal), 
     pH = mean(pH))
-
+data_pca$Site<-factor(data_pca$Site, c("BB", "NQ", "AB", "VL"))
 
 data_pca = na.omit(data_pca)
 pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
@@ -494,9 +483,9 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
                   ellipse = TRUE, 
                   circle = FALSE,  
                   label.repel = TRUE)+ 
-  geom_point(aes(colour=data_pca$Site, shape=data_pca$Site))+
-  scale_shape_manual(name="Site", values=c(22,23,24,21))+
-  scale_colour_manual(name="Site", values=cols5) +
+  geom_point(aes(shape=data_pca$Site,color=data_pca$Site), size = 4)+
+  scale_shape_manual(name="Site", values=c(21, 24, 23, 22))+
+  scale_color_manual(name="Site", values=cols5) +
   labs(
     x = "PC1 (45.5%)", 
     y = "PC2 (18.1%)")+
@@ -510,13 +499,13 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
     axis.text.y = element_text(size = 22, color = "black"),
     axis.title.x = element_text(size=22),
     axis.text.x = element_text(size = 22, color = "black"))+
-  guides(shape=guide_legend(override.aes=list(fill=cols5)), colour = "none")
+  guides(shape=guide_legend(override.aes=list(fill=cols5)), color = "none")
 
 PCAPlot
 
 ggsave("PrincipalComponentAnalysis.pdf", PCAPlot, width = 12, height = 7)
 
-
+ 
 #Scree Plot
 ggscreeplot(pca)
 fviz_eig(pca) #factoextra_package
