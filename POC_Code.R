@@ -12,6 +12,8 @@ library(ggbiplot)
 library(patchwork)
 library(gt)
 library(factoextra)
+library(performance)
+library(see)
 
 #Pending to eliminate Libraries
 library(rgdal)
@@ -28,8 +30,7 @@ library(rstatix)
 #### 2. Insert Dataset (.csv), Convert Sampling Date column from character to Date format, Rename Columns, Filter sites of interest, Eliminate parameters that will not be used in the analysis #############
 
 
-data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%  
-  dplyr::rename(
+data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%   dplyr::rename(
     Date = "Sampling Date", 
     Site = "Sample Site", 
     Lon = "Long", 
@@ -54,11 +55,10 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
 #### 3. Figure 1: Map & Stations ########
 
 
-register_google(key = 'AIzaSyBAkWwL25eBEQFJf4n9Rc2sKQbxSAqu7To')
+register_google(key = '...')
 
 
 cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#4393c3', "VL" = '#053061') #diverging
-smbls <- c("VL" = '22', "AB" = '23', "NQ" = '24', "BB" = '21')
 
 
 #Zoom Out Map
@@ -77,15 +77,9 @@ LPmap <- get_googlemap(c(lon = -67.04, lat = 17.92),
                        maptype = "satellite", 
                        force = FALSE)
 
-# LPmap1 <- get_googlemap(c(lon = -67.046801, lat = 17.955173),
-#                        zoom = 12, 
-#                        maptype = "satellite", 
-#                        force = FALSE)
-
 
 F1<-ggmap(LPmap) +
-  #geom_rect(aes(xmin = -67.055, xmax = -67.008, ymin = 17.945, ymax = 17.978), colour = "white", alpha = 0, size = 1)+ #Rect includes AB, NQ, BB
-  geom_rect(aes(xmin = -67.055, xmax = -67.041, ymin = 17.9460, ymax = 17.9628), colour = "white", alpha = 0, size = 1)+ #RECT includes only AB NQ
+  geom_rect(aes(xmin = -67.056, xmax = -67.041, ymin = 17.9445, ymax = 17.9645), colour = "white", alpha = 0, size = 1)+ 
   theme_classic()+
   ggtitle("A")+
   theme(
@@ -116,8 +110,7 @@ F1
 
 dataMapZoom <- data %>% 
   dplyr::filter(Site =="AB"|
-                  #Site == "BB"|
-                  Site == "NQ") %>% 
+                Site == "NQ") %>% 
   subset(Date > "2018-01-01" & Date < "2019-12-31") %>% 
   replace_with_na_all(condition=~.x==-999)
 
@@ -137,14 +130,9 @@ F2<-ggmap(LPmapzoom) +
     axis.text.x = element_text(size = 22),
     axis.title.y = element_text(size = 22), 
     axis.text.y = element_text(size = 22))+ 
-  #Original Zoom
-  # scale_y_continuous(limits = c(17.945, 17.978), breaks = seq(17.94, 17.97, by = 0.01))+
-  # scale_x_continuous(limits = c(-67.055, -67.008), breaks = seq(-67.05, -67.00, by = 0.010))+
-  #Zoom for AB & NQ Only 
-  scale_y_continuous(limits = c(17.9460, 17.9628), breaks = seq(17.94, 17.96, by = 0.005))+
-  scale_x_continuous(limits = c(-67.055, -67.041), breaks = seq(-67.05, -67.04, by = 0.005))+
-  #ylab("Latitude")+
-  ylab(NULL)+
+  scale_y_continuous(limits = c(17.9445, 17.9645), breaks = seq(17.94, 17.965, by = 0.008))+
+  scale_x_continuous(limits = c(-67.056, -67.041), breaks = seq(-67.055, -67.04, by = 0.006))+
+  ylab("Latitude")+
   xlab("Longitude")+
   geom_point(dataMapZoom, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, size=5, stroke = 2), size = 8, color="white", show.legend = FALSE)+
   scale_shape_manual(values=c(21,24,23), 
@@ -154,9 +142,6 @@ F2<-ggmap(LPmapzoom) +
                     breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
   annotate("text", x = -67.0510, y = 17.9516, label= "AB", colour="white", fontface="bold", size=10)+
   annotate("text", x = -67.0504, y = 17.9576, label= "NQ", colour="white", fontface="bold", size=10)
-  #annotate("text", x = -67.0142, y = 17.9706, label= "BB", colour="white", fontface="bold", size=6)
-
-
 
 F1+F2
 
@@ -483,9 +468,10 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
                   ellipse = TRUE, 
                   circle = FALSE,  
                   label.repel = TRUE)+ 
-  geom_point(aes(shape=data_pca$Site,color=data_pca$Site), size = 4)+
+  geom_point(aes(shape=data_pca$Site,fill=data_pca$Site, color = data_pca$Site), size = 8)+
   scale_shape_manual(name="Site", values=c(21, 24, 23, 22))+
   scale_color_manual(name="Site", values=cols5) +
+  scale_fill_manual(name="Site", values=cols5) + 
   labs(
     x = "PC1 (45.5%)", 
     y = "PC2 (18.1%)")+
@@ -498,8 +484,8 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
     axis.title.y = element_text(size=22),
     axis.text.y = element_text(size = 22, color = "black"),
     axis.title.x = element_text(size=22),
-    axis.text.x = element_text(size = 22, color = "black"))+
-  guides(shape=guide_legend(override.aes=list(fill=cols5)), color = "none")
+    axis.text.x = element_text(size = 22, color = "black"))
+ 
 
 PCAPlot
 
@@ -508,14 +494,10 @@ ggsave("PrincipalComponentAnalysis.pdf", PCAPlot, width = 12, height = 7)
  
 #Scree Plot
 ggscreeplot(pca)
-fviz_eig(pca) #factoextra_package
+fviz_eig(pca)
 
 
 #### 8. Stats: ANOVA ####
-
-library(performance)
-library(see)
-
 
 data_mean$Month = substr(data_mean$Date,6,7)
 
@@ -599,5 +581,14 @@ tab_model(d15N0,d15N1,d15N3,d15N4,temp1,temp2,temp3, temp4, sal1, sal2, sal3, sa
 
 
 
+# Computing correlation matrix
+correlation_matrix <- round(cor(as.data.frame(as.numeric(data_pca[complete.cases(data_pca[,2:8]),]))),1)
 
+# Computing correlation matrix with p-values
+corrp.mat <- cor_pmat(data_pca)
+
+# Visualizing the correlation matrix using
+# square and circle methods
+ggcorrplot(correlation_matrix, method ="square")
+ggcorrplot(correlation_matrix, method ="circle”))
 
