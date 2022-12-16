@@ -30,7 +30,8 @@ library(rstatix)
 #### 2. Insert Dataset (.csv), Convert Sampling Date column from character to Date format, Rename Columns, Filter sites of interest, Eliminate parameters that will not be used in the analysis #############
 
 
-data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%   dplyr::rename(
+data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%   
+  dplyr::rename(
     Date = "Sampling Date", 
     Site = "Sample Site", 
     Lon = "Long", 
@@ -42,11 +43,13 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
     Temp = "Temp C (ITS90)", 
     DIC = "DIC (UMOL/KG)",
     TA = "TA (UMOL/KG)") %>%
+ mutate(
+    CN = POC/PON) %>% 
   dplyr::filter(Site =="AB"|
            Site == "BB"|
            Site == "NQ"|
            Site == "VL") %>% 
-  dplyr::select(-c(TA, DIC)) %>% 
+  dplyr::select(-c(TA, DIC)) %>%
   subset(Date > "2018-01-01" & Date < "2019-12-31") %>% 
   replace_with_na_all(condition=~.x==-999)
 
@@ -161,8 +164,9 @@ data_mean <- data %>%
             PON_std=sd(PON), 
             Temp = mean(Temp),
             Sal = mean(Sal), 
-            pH = mean(pH), 
-            CN = POC_m/PON_m, 
+            pH = mean(pH),
+            CN_m = mean(CN),
+            CN_std=sd(CN),
             Lat = mean(Lat), 
             Lon = mean(Lon))
 data_mean$Site <- factor(data_mean$Site, level = c("BB", "NQ", "AB", "VL"))
@@ -303,6 +307,25 @@ NIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d15N_m, fill=Site, shape=Site)
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size =18))
 
+# CNGraph2 <- ggplot(data_mean, aes(x = Date , y = CN, fill= Site, shape=Site)) + 
+#   ggtitle("X")+
+#   geom_point(size = 4) + 
+#   scale_shape_manual(values=c(21, 24, 23, 22))+ 
+#   scale_fill_manual(values=cols5)+              
+#   geom_line()+
+#   #geom_errorbar(aes(ymin = Temp, ymax = Temp))+
+#   theme_classic()+
+#   labs(x = NULL, y = "C:N") +
+#   scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
+#   theme(
+#     legend.position= "top", 
+#     axis.text.x = element_text(size=16),
+#     axis.title.x = element_blank(), 
+#     axis.title.y = element_text(size=18),
+#     axis.text.y = element_text(size = 18), 
+#     #axis.line.x = element_blank(),
+#     axis.ticks.x = element_blank())
+# CNGraph2
 
 TimeseriesPlot<-((TempGraph2/SalGraph2/pHGraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2)) + 
   plot_layout(guides='collect') &
@@ -431,6 +454,19 @@ NIRBox<-ggplot(data_mean, mapping = aes(Site, d15N_m)) +
     axis.text.x = element_text(size = 16), 
     legend.position = "none")
 
+CNBox<-ggplot(data_mean, mapping = aes(Site, CN)) +  
+  ggtitle("X")+
+  geom_boxplot(aes(fill = Site))+
+  geom_jitter(width = 0.1)+
+  scale_fill_manual(values=cols5)+
+  theme_classic()+
+  labs(x = NULL, y = expression(paste("C:N")))+
+  theme(
+    axis.title.y = element_text(size=16),
+    axis.text.y = element_text(size = 16),
+    axis.text.x = element_text(size = 16), 
+    legend.position = "none")
+CNBox
 
 BoxPlot <- ((TempBox/SalBox/pHBox)|(POCBox/PONBox/CIRBox/NIRBox)) +
   plot_layout(guides = "collect") 
@@ -468,7 +504,7 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
                   ellipse = TRUE, 
                   circle = FALSE,  
                   label.repel = TRUE)+ 
-  geom_point(aes(shape=data_pca$Site,fill=data_pca$Site, color = data_pca$Site), size = 8)+
+  geom_point(aes(shape=data_pca$Site,fill=data_pca$Site, color = 'black'), size = 8)+
   scale_shape_manual(name="Site", values=c(21, 24, 23, 22))+
   scale_color_manual(name="Site", values=cols5) +
   scale_fill_manual(name="Site", values=cols5) + 
@@ -485,7 +521,7 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
     axis.text.y = element_text(size = 22, color = "black"),
     axis.title.x = element_text(size=22),
     axis.text.x = element_text(size = 22, color = "black"))
- 
+
 
 PCAPlot
 
