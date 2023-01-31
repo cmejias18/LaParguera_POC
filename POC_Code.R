@@ -226,7 +226,8 @@ pHGraph2 <- ggplot(data_mean, aes(x = Date , y = pH, fill=Site, shape = Site)) +
   scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
   #scale_y_continuous(limits = c(7.4, 8.4), breaks = seq(7.4, 8.4, by = 0.2))+
   theme(
-    axis.text.x = element_text(size=16),
+    #axis.text.x = element_text(size=16),
+    axis.text.x = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size =18))
@@ -307,25 +308,25 @@ NIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d15N_m, fill=Site, shape=Site)
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size =18))
 
-# CNGraph2 <- ggplot(data_mean, aes(x = Date , y = CN, fill= Site, shape=Site)) + 
-#   ggtitle("X")+
-#   geom_point(size = 4) + 
-#   scale_shape_manual(values=c(21, 24, 23, 22))+ 
-#   scale_fill_manual(values=cols5)+              
-#   geom_line()+
-#   #geom_errorbar(aes(ymin = Temp, ymax = Temp))+
-#   theme_classic()+
-#   labs(x = NULL, y = "C:N") +
-#   scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
-#   theme(
-#     legend.position= "top", 
-#     axis.text.x = element_text(size=16),
-#     axis.title.x = element_blank(), 
-#     axis.title.y = element_text(size=18),
-#     axis.text.y = element_text(size = 18), 
-#     #axis.line.x = element_blank(),
-#     axis.ticks.x = element_blank())
-# CNGraph2
+CNGraph2 <- ggplot(data_mean, aes(x = Date , y = CN_m, fill= Site, shape=Site)) +
+  ggtitle("X")+
+  geom_point(size = 4) +
+  scale_shape_manual(values=c(21, 24, 23, 22))+
+  scale_fill_manual(values=cols5)+
+  geom_line()+
+  geom_errorbar(aes(ymin = CN_m - CN_std, ymax = CN_m + CN_std))+
+  theme_classic()+
+  labs(x = NULL, y = "C:N") +
+  scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
+  theme(
+    legend.position= "top",
+    axis.text.x = element_text(size=16),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size=18),
+    axis.text.y = element_text(size = 18),
+    #axis.line.x = element_blank(),
+    axis.ticks.x = element_blank())
+
 
 TimeseriesPlot<-((TempGraph2/SalGraph2/pHGraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2)) + 
   plot_layout(guides='collect') &
@@ -333,12 +334,19 @@ TimeseriesPlot<-((TempGraph2/SalGraph2/pHGraph2)|(POCGraph2/PONGraph2/CIRGraph2/
         legend.title = element_text(size=16), 
         legend.text = element_text(size=16))
 
+TimeseriesPlot2<-((TempGraph2/SalGraph2/pHGraph2/CNGraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2)) + 
+  plot_layout(guides='collect') &
+  theme(legend.position = "bottom",
+        legend.title = element_text(size=16), 
+        legend.text = element_text(size=16))
+
 TimeseriesPlot
+TimeseriesPlot2
   
 ggsave("ParameterTimeSeries_Final.pdf", TimeseriesPlot, width = 12, height = 7)
 
 
-#### 6. Figure 3: Parameter Gradient (BoxPlot) Box Plot
+###6. Figure 3: Parameter Gradient (BoxPlot) Box Plot### 
 
 
 TempBox<-ggplot(data_mean, mapping = aes(Site, Temp)) +  
@@ -385,7 +393,8 @@ pHBox<-ggplot(data_mean, mapping = aes(Site, pH)) +
   theme(
     axis.title.y = element_text(size=16),
     axis.text.y = element_text(size = 16),
-    axis.text.x = element_text(size = 16), 
+    axis.text.x = element_blank(),
+    #axis.text.x = element_text(size = 16), 
     legend.position = "none")
 
 
@@ -454,7 +463,7 @@ NIRBox<-ggplot(data_mean, mapping = aes(Site, d15N_m)) +
     axis.text.x = element_text(size = 16), 
     legend.position = "none")
 
-CNBox<-ggplot(data_mean, mapping = aes(Site, CN)) +  
+CNBox<-ggplot(data_mean, mapping = aes(Site, CN_m)) +  
   ggtitle("X")+
   geom_boxplot(aes(fill = Site))+
   geom_jitter(width = 0.1)+
@@ -471,7 +480,11 @@ CNBox
 BoxPlot <- ((TempBox/SalBox/pHBox)|(POCBox/PONBox/CIRBox/NIRBox)) +
   plot_layout(guides = "collect") 
 
+BoxPlot2 <- ((TempBox/SalBox/pHBox/CNBox)|(POCBox/PONBox/CIRBox/NIRBox)) +
+  plot_layout(guides = "collect") 
+
 BoxPlot
+BoxPlot2
 
 ggsave("ParameterGradient_Final.pdf", BoxPlot, width = 12, height = 7)
 
@@ -488,11 +501,13 @@ data_pca <- data %>%
     PON = mean(PON),
     Temp = mean(Temp),
     Sal = mean(Sal), 
-    pH = mean(pH))
+    pH = mean(pH), 
+    CN = mean(CN))
 data_pca$Site<-factor(data_pca$Site, c("BB", "NQ", "AB", "VL"))
 
 data_pca = na.omit(data_pca)
 pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
+pca <- prcomp(data_pca[c(3:10)], center = TRUE, scale. = TRUE) #para incluir C:N
 
 pca
 summary(pca)
@@ -609,11 +624,16 @@ TukeyHSD(d15N4, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N <
 
 
 library(sjPlot)
-tab_model(d15N0,d15N1,d15N3,d15N4,temp1,temp2,temp3, temp4, sal1, sal2, sal3, sal4,
+tab_model(m1,m2,m3,m4,m5,m6,m7,
+          
           string.pred = "Coeffcient",
+          
           string.ci = "Conf. Int (95%)",
+          
           string.p = "p-Value",
+          
           file="Table_1-Model_Summaries.html")
+
 
 
 
