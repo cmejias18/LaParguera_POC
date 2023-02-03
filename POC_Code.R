@@ -64,7 +64,7 @@ register_google(key = '...')
 cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#4393c3', "VL" = '#053061') #diverging
 
 
-#Zoom Out Map
+####Zoom Out Map####
 
 dataMap <- data %>% 
   dplyr::filter(Site =="VL"|
@@ -624,8 +624,7 @@ TukeyHSD(d15N4, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N <
 
 
 library(sjPlot)
-tab_model(m1,m2,m3,m4,m5,m6,m7,
-          
+tab_model(temp3,sal3,
           string.pred = "Coeffcient",
           
           string.ci = "Conf. Int (95%)",
