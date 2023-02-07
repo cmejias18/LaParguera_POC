@@ -577,8 +577,8 @@ pH1=aov(pH~Site,data=data_mean) #Site as a predictor of pH
 pH2=aov(pH~Month,data=data_mean) #Month as a predictor of pH
 pH3=aov(pH~Site+Month,data=data_mean) #Site + Month as predictors of pH
 pH4=aov(pH~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of pH
-AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(pH4)#Site and Month are a significant predictor of pH
+AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, pH4 has the lowest AIC but Site:month is not significant so select pH3
+summary(pH3)#Site and Month are a significant predictor of pH
 check_model(pH4) #model assumptions appear to be mostly okay here
 TukeyHSD(pH4, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
 
@@ -622,19 +622,27 @@ summary(d15N4) #Site and Month are a significant predictor of d15N
 check_model(d15N4) #model assumptions appear to be mostly okay here
 TukeyHSD(d15N4, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N < AB d15N, VL d15N < BB d15N, VL d15N < NQ d15N
 
+######## Adding code to export table of ANOVA model summaries
+#install packages
+install.packages("modelsummary")
+install.packages("htmltools")
+install.packages("flextable")
 
-library(sjPlot)
-tab_model(temp3,sal3,
-          string.pred = "Coeffcient",
-          
-          string.ci = "Conf. Int (95%)",
-          
-          string.p = "p-Value",
-          
-          file="Table_1-Model_Summaries.html")
+#load libraries
+library(modelsummary)
+#https://vincentarelbundock.github.io/modelsummary/articles/modelsummary.html
 
+#generate a list of best AIC model summaries
+models = list(Temperature=(temp3),
+              Salinity=(sal3),
+              pH=(pH3), #please note, the interaction for model pH4 was not significant so I have removed it
+              POC=(poc1),
+              PON=(PON1),
+              d13C=(d13C1),
+              d15N=(d15N4))
 
-
+#create table of best AIC model summaries
+modelsummary(models,estimate="{p.value}",statistic=NULL,output = "TableS1.docx",title = 'p-values and summary statistics are reported for the best AIC model selected for each parameter. All site-level p-values are relative to the Bioluminescent Bay Site and all month p-values are relative to January.')
 
 # Computing correlation matrix
 correlation_matrix <- round(cor(as.data.frame(as.numeric(data_pca[complete.cases(data_pca[,2:8]),]))),1)
@@ -645,5 +653,5 @@ corrp.mat <- cor_pmat(data_pca)
 # Visualizing the correlation matrix using
 # square and circle methods
 ggcorrplot(correlation_matrix, method ="square")
-ggcorrplot(correlation_matrix, method ="circle”))
+ggcorrplot(correlation_matrix, method ="circle")
 
