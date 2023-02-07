@@ -576,9 +576,15 @@ pH1=aov(pH~Site,data=data_mean) #Site as a predictor of pH
 pH2=aov(pH~Month,data=data_mean) #Month as a predictor of pH
 pH3=aov(pH~Site+Month,data=data_mean) #Site + Month as predictors of pH
 pH4=aov(pH~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of pH
+<<<<<<< HEAD
 AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
 summary(pH4)#Site and Month are a significant predictor of pH
 check_model(pH4)ins #model assumptions appear to be mostly okay here
+=======
+AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, pH4 has the lowest AIC but Site:month is not significant so select pH3
+summary(pH3)#Site and Month are a significant predictor of pH
+check_model(pH4) #model assumptions appear to be mostly okay here
+>>>>>>> 2ba97230082a3206d713462660c22a0a558735fe
 TukeyHSD(pH4, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
 
 poc0=aov(POC_m~1,data=data_mean) #null model
@@ -621,7 +627,13 @@ summary(d15N4) #Site and Month are a significant predictor of d15N
 check_model(d15N4) #model assumptions appear to be mostly okay here
 TukeyHSD(d15N4, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N < AB d15N, VL d15N < BB d15N, VL d15N < NQ d15N
 
+######## Adding code to export table of ANOVA model summaries
+#install packages
+install.packages("modelsummary")
+install.packages("htmltools")
+install.packages("flextable")
 
+<<<<<<< HEAD
 library(sjPlot)
 tab_model(temp0, temp1,temp2, temp3, temp4, sal0, sal1,sal2, sal3, sal4,
           string.pred = "Coeffcient",
@@ -634,7 +646,23 @@ tab_model(temp0, temp1,temp2, temp3, temp4, sal0, sal1,sal2, sal3, sal4,
 
 
 library(gtsummary)
+=======
+#load libraries
+library(modelsummary)
+#https://vincentarelbundock.github.io/modelsummary/articles/modelsummary.html
 
+#generate a list of best AIC model summaries
+models = list(Temperature=(temp3),
+              Salinity=(sal3),
+              pH=(pH3), #please note, the interaction for model pH4 was not significant so I have removed it
+              POC=(poc1),
+              PON=(PON1),
+              d13C=(d13C1),
+              d15N=(d15N4))
+>>>>>>> 2ba97230082a3206d713462660c22a0a558735fe
+
+#create table of best AIC model summaries
+modelsummary(models,estimate="{p.value}",statistic=NULL,output = "TableS1.docx",title = 'p-values and summary statistics are reported for the best AIC model selected for each parameter. All site-level p-values are relative to the Bioluminescent Bay Site and all month p-values are relative to January.')
 
 
 
