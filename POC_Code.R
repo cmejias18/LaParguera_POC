@@ -27,7 +27,7 @@ library(rstatix)
 
 
 
-#### 2. Insert Dataset (.csv), Convert Sampling Date column from character to Date format, Rename Columns, Filter sites of interest, Eliminate parameters that will not be used in the analysis #############
+#### 2. Insert Dataset (.csv) #############
 
 
 data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%   
@@ -43,7 +43,7 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
     Temp = "Temp C (ITS90)", 
     DIC = "DIC (UMOL/KG)",
     TA = "TA (UMOL/KG)") %>%
- mutate(
+  dplyr::mutate(
     CN = POC/PON) %>% 
   dplyr::filter(Site =="AB"|
            Site == "BB"|
@@ -55,16 +55,15 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
 
 
 
+
 #### 3. Figure 1: Map & Stations ########
 
-
 register_google(key = '...')
-
 
 cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#4393c3', "VL" = '#053061') #diverging
 
 
-####Zoom Out Map####
+##Zoom Out Map##
 
 dataMap <- data %>% 
   dplyr::filter(Site =="VL"|
@@ -108,7 +107,7 @@ F1<-ggmap(LPmap) +
   
 F1
 
-#Zoom In Map
+##Zoom In Map##
 
 
 dataMapZoom <- data %>% 
@@ -346,7 +345,7 @@ TimeseriesPlot2
 ggsave("ParameterTimeSeries_Final.pdf", TimeseriesPlot, width = 12, height = 7)
 
 
-###6. Figure 3: Parameter Gradient (BoxPlot) Box Plot### 
+#### 6. Figure 3: Parameter Gradient (BoxPlot) Box Plot#### 
 
 
 TempBox<-ggplot(data_mean, mapping = aes(Site, Temp)) +  
@@ -548,7 +547,7 @@ ggscreeplot(pca)
 fviz_eig(pca)
 
 
-#### 8. Stats: ANOVA ####
+#### 8. Stats: ANOVA & Models ####
 
 data_mean$Month = substr(data_mean$Date,6,7)
 
@@ -579,7 +578,7 @@ pH3=aov(pH~Site+Month,data=data_mean) #Site + Month as predictors of pH
 pH4=aov(pH~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of pH
 AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
 summary(pH4)#Site and Month are a significant predictor of pH
-check_model(pH4) #model assumptions appear to be mostly okay here
+check_model(pH4)ins #model assumptions appear to be mostly okay here
 TukeyHSD(pH4, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
 
 poc0=aov(POC_m~1,data=data_mean) #null model
@@ -624,7 +623,7 @@ TukeyHSD(d15N4, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N <
 
 
 library(sjPlot)
-tab_model(temp3,sal3,
+tab_model(temp0, temp1,temp2, temp3, temp4, sal0, sal1,sal2, sal3, sal4,
           string.pred = "Coeffcient",
           
           string.ci = "Conf. Int (95%)",
@@ -634,9 +633,14 @@ tab_model(temp3,sal3,
           file="Table_1-Model_Summaries.html")
 
 
+library(gtsummary)
 
 
-# Computing correlation matrix
+
+
+
+
+#### 9.Computing correlation matrix####
 correlation_matrix <- round(cor(as.data.frame(as.numeric(data_pca[complete.cases(data_pca[,2:8]),]))),1)
 
 # Computing correlation matrix with p-values
@@ -645,5 +649,5 @@ corrp.mat <- cor_pmat(data_pca)
 # Visualizing the correlation matrix using
 # square and circle methods
 ggcorrplot(correlation_matrix, method ="square")
-ggcorrplot(correlation_matrix, method ="circle”))
+ggcorrplot(correlation_matrix, method ="circle")
 
