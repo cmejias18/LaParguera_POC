@@ -576,16 +576,10 @@ pH1=aov(pH~Site,data=data_mean) #Site as a predictor of pH
 pH2=aov(pH~Month,data=data_mean) #Month as a predictor of pH
 pH3=aov(pH~Site+Month,data=data_mean) #Site + Month as predictors of pH
 pH4=aov(pH~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of pH
-<<<<<<< HEAD
-AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(pH4)#Site and Month are a significant predictor of pH
-check_model(pH4)ins #model assumptions appear to be mostly okay here
-=======
 AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, pH4 has the lowest AIC but Site:month is not significant so select pH3
 summary(pH3)#Site and Month are a significant predictor of pH
-check_model(pH4) #model assumptions appear to be mostly okay here
->>>>>>> 2ba97230082a3206d713462660c22a0a558735fe
-TukeyHSD(pH4, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
+check_model(pH3) #model assumptions appear to be mostly okay here
+TukeyHSD(pH3, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
 
 poc0=aov(POC_m~1,data=data_mean) #null model
 poc1=aov(POC_m~Site,data=data_mean) #Site as a predictor of POC
@@ -633,20 +627,6 @@ install.packages("modelsummary")
 install.packages("htmltools")
 install.packages("flextable")
 
-<<<<<<< HEAD
-library(sjPlot)
-tab_model(temp0, temp1,temp2, temp3, temp4, sal0, sal1,sal2, sal3, sal4,
-          string.pred = "Coeffcient",
-          
-          string.ci = "Conf. Int (95%)",
-          
-          string.p = "p-Value",
-          
-          file="Table_1-Model_Summaries.html")
-
-
-library(gtsummary)
-=======
 #load libraries
 library(modelsummary)
 #https://vincentarelbundock.github.io/modelsummary/articles/modelsummary.html
@@ -659,7 +639,7 @@ models = list(Temperature=(temp3),
               PON=(PON1),
               d13C=(d13C1),
               d15N=(d15N4))
->>>>>>> 2ba97230082a3206d713462660c22a0a558735fe
+
 
 #create table of best AIC model summaries
 modelsummary(models,estimate="{p.value}",statistic=NULL,output = "TableS1.docx",title = 'p-values and summary statistics are reported for the best AIC model selected for each parameter. All site-level p-values are relative to the Bioluminescent Bay Site and all month p-values are relative to January.')
