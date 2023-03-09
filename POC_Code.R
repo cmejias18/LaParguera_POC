@@ -58,9 +58,10 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
 
 #### 3. Figure 1: Map & Stations ########
 
-register_google(key = '...')
+register_google(key = 'AIzaSyBAkWwL25eBEQFJf4n9Rc2sKQbxSAqu7To')
 
-cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#4393c3', "VL" = '#053061') #diverging
+#colsn <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#4393c3', "VL" = '#053061')#diverging
+cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#92c5de', "VL" = '#2166ac')
 
 
 ##Zoom Out Map##
@@ -81,7 +82,7 @@ LPmap <- get_googlemap(c(lon = -67.04, lat = 17.92),
 
 
 F1<-ggmap(LPmap) +
-  geom_rect(aes(xmin = -67.056, xmax = -67.041, ymin = 17.9445, ymax = 17.9645), colour = "white", alpha = 0, size = 1)+ 
+  geom_rect(aes(xmin = -67.056, xmax = -67.041, ymin = 17.9445, ymax = 17.9645), colour = "white", alpha = 0, linewidth = 1)+ 
   theme_classic()+
   ggtitle("A")+
   theme(
@@ -144,6 +145,8 @@ F2<-ggmap(LPmapzoom) +
                     breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
   annotate("text", x = -67.0510, y = 17.9516, label= "AB", colour="white", fontface="bold", size=10)+
   annotate("text", x = -67.0504, y = 17.9576, label= "NQ", colour="white", fontface="bold", size=10)
+
+F2
 
 F1+F2
 
@@ -225,11 +228,12 @@ pHGraph2 <- ggplot(data_mean, aes(x = Date , y = pH, fill=Site, shape = Site)) +
   scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
   #scale_y_continuous(limits = c(7.4, 8.4), breaks = seq(7.4, 8.4, by = 0.2))+
   theme(
-    #axis.text.x = element_text(size=16),
-    axis.text.x = element_blank(),
+    axis.text.x = element_text(size=16),
+    #axis.text.x = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size =18))
+
 
 
 POCGraph2 <- ggplot(data_mean, aes(x = Date , y = POC_m, fill=Site, shape = Site)) + 
@@ -307,28 +311,27 @@ NIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d15N_m, fill=Site, shape=Site)
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size =18))
 
-CNGraph2 <- ggplot(data_mean, aes(x = Date , y = CN_m, fill= Site, shape=Site)) +
-  ggtitle("X")+
-  geom_point(size = 4) +
-  scale_shape_manual(values=c(21, 24, 23, 22))+
-  scale_fill_manual(values=cols5)+
-  geom_line()+
-  geom_errorbar(aes(ymin = CN_m - CN_std, ymax = CN_m + CN_std))+
-  theme_classic()+
-  labs(x = NULL, y = "C:N") +
-  scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
-  theme(
-    legend.position= "top",
-    axis.text.x = element_text(size=16),
-    axis.title.x = element_blank(),
-    axis.title.y = element_text(size=18),
-    axis.text.y = element_text(size = 18),
-    #axis.line.x = element_blank(),
-    axis.ticks.x = element_blank())
+# CNGraph2 <- ggplot(data_mean, aes(x = Date , y = CN_m, fill= Site, shape=Site)) +
+#   ggtitle("X")+
+#   geom_point(size = 4) +
+#   scale_shape_manual(values=c(21, 24, 23, 22))+
+#   scale_fill_manual(values=cols5)+
+#   geom_line()+
+#   geom_errorbar(aes(ymin = CN_m - CN_std, ymax = CN_m + CN_std))+
+#   theme_classic()+
+#   labs(x = NULL, y = "C:N") +
+#   scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
+#   theme(
+#     legend.position= "top",
+#     axis.text.x = element_text(size=16),
+#     axis.title.x = element_blank(),
+#     axis.title.y = element_text(size=18),
+#     axis.text.y = element_text(size = 18),
+#     #axis.line.x = element_blank(),
+#     axis.ticks.x = element_blank())
 
 
-TimeseriesPlot<-((TempGraph2/SalGraph2/pHGraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2)) + 
-  plot_layout(guides='collect') &
+TimeseriesPlot<-((TempGraph2/SalGraph2/pHGraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2)) +   plot_layout(guides='collect') &
   theme(legend.position = "bottom",
         legend.title = element_text(size=16), 
         legend.text = element_text(size=16))
@@ -342,7 +345,7 @@ TimeseriesPlot2<-((TempGraph2/SalGraph2/pHGraph2/CNGraph2)|(POCGraph2/PONGraph2/
 TimeseriesPlot
 TimeseriesPlot2
   
-ggsave("ParameterTimeSeries_Final.pdf", TimeseriesPlot, width = 12, height = 7)
+ggsave("ParameterTimeSeries_Final.tiff", TimeseriesPlot, width = 12, height = 7)
 
 
 #### 6. Figure 3: Parameter Gradient (BoxPlot) Box Plot#### 
@@ -392,8 +395,8 @@ pHBox<-ggplot(data_mean, mapping = aes(Site, pH)) +
   theme(
     axis.title.y = element_text(size=16),
     axis.text.y = element_text(size = 16),
-    axis.text.x = element_blank(),
-    #axis.text.x = element_text(size = 16), 
+    # axis.text.x = element_blank(),
+    axis.text.x = element_text(size = 16), 
     legend.position = "none")
 
 
@@ -462,19 +465,19 @@ NIRBox<-ggplot(data_mean, mapping = aes(Site, d15N_m)) +
     axis.text.x = element_text(size = 16), 
     legend.position = "none")
 
-CNBox<-ggplot(data_mean, mapping = aes(Site, CN_m)) +  
-  ggtitle("X")+
-  geom_boxplot(aes(fill = Site))+
-  geom_jitter(width = 0.1)+
-  scale_fill_manual(values=cols5)+
-  theme_classic()+
-  labs(x = NULL, y = expression(paste("C:N")))+
-  theme(
-    axis.title.y = element_text(size=16),
-    axis.text.y = element_text(size = 16),
-    axis.text.x = element_text(size = 16), 
-    legend.position = "none")
-CNBox
+# CNBox<-ggplot(data_mean, mapping = aes(Site, CN_m)) +  
+#   ggtitle("X")+
+#   geom_boxplot(aes(fill = Site))+
+#   geom_jitter(width = 0.1)+
+#   scale_fill_manual(values=cols5)+
+#   theme_classic()+
+#   labs(x = NULL, y = expression(paste("C:N")))+
+#   theme(
+#     axis.title.y = element_text(size=16),
+#     axis.text.y = element_text(size = 16),
+#     axis.text.x = element_text(size = 16), 
+#     legend.position = "none")
+# CNBox
 
 BoxPlot <- ((TempBox/SalBox/pHBox)|(POCBox/PONBox/CIRBox/NIRBox)) +
   plot_layout(guides = "collect") 
@@ -485,7 +488,7 @@ BoxPlot2 <- ((TempBox/SalBox/pHBox/CNBox)|(POCBox/PONBox/CIRBox/NIRBox)) +
 BoxPlot
 BoxPlot2
 
-ggsave("ParameterGradient_Final.pdf", BoxPlot, width = 12, height = 7)
+ggsave("ParameterGradient_Final.tiff", BoxPlot, width = 12, height = 7)
 
 
 
@@ -506,7 +509,7 @@ data_pca$Site<-factor(data_pca$Site, c("BB", "NQ", "AB", "VL"))
 
 data_pca = na.omit(data_pca)
 pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
-pca <- prcomp(data_pca[c(3:10)], center = TRUE, scale. = TRUE) #para incluir C:N
+#pca <- prcomp(data_pca[c(3:10)], center = TRUE, scale. = TRUE) #para incluir C:N
 
 pca
 summary(pca)
@@ -518,7 +521,7 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
                   ellipse = TRUE, 
                   circle = FALSE,  
                   label.repel = TRUE)+ 
-  geom_point(aes(shape=data_pca$Site,fill=data_pca$Site, color = 'black'), size = 8)+
+  geom_point(aes(shape=data_pca$Site,fill=data_pca$Site), size = 8)+
   scale_shape_manual(name="Site", values=c(21, 24, 23, 22))+
   scale_color_manual(name="Site", values=cols5) +
   scale_fill_manual(name="Site", values=cols5) + 
@@ -539,7 +542,7 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
 
 PCAPlot
 
-ggsave("PrincipalComponentAnalysis.pdf", PCAPlot, width = 12, height = 7)
+ggsave("PrincipalComponentAnalysis.tiff", PCAPlot, width = 12, height = 7)
 
  
 #Scree Plot
