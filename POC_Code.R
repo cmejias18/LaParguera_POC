@@ -14,6 +14,9 @@ library(gt)
 library(factoextra)
 library(performance)
 library(see)
+library(ggspatial)
+library(ggsn)
+
 
 #Pending to eliminate Libraries
 library(rgdal)
@@ -60,7 +63,6 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
 
 register_google(key = 'AIzaSyBAkWwL25eBEQFJf4n9Rc2sKQbxSAqu7To')
 
-#colsn <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#4393c3', "VL" = '#053061')#diverging
 cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#92c5de', "VL" = '#2166ac')
 
 
@@ -80,9 +82,26 @@ LPmap <- get_googlemap(c(lon = -67.04, lat = 17.92),
                        maptype = "satellite", 
                        force = FALSE)
 
+LPmap <- ne_tiles(c(longitude = -67.04, latitude = 17.92),
+                       zoom = 12, category="osm")
+
+
 
 F1<-ggmap(LPmap) +
   geom_rect(aes(xmin = -67.056, xmax = -67.041, ymin = 17.9445, ymax = 17.9645), colour = "white", alpha = 0, linewidth = 1)+ 
+  ggsn::scalebar(x.min = -67.00, x.max = -66.97, y.min = 17.86, y.max = 17.89, 
+                 location = "bottomleft", 
+                 dist = 2000, 
+                 dist_unit = "m", 
+                 transform = TRUE, 
+                 model = "WGS84", 
+                 height = 0.05, 
+                 st.dist=0.2, 
+                 st.bottom= FALSE, 
+                 st.size = 4,  
+                 st.color = "white", 
+                 box.color = "black", 
+                 box.fill = c("black", "white"))+
   theme_classic()+
   ggtitle("A")+
   theme(
@@ -104,12 +123,15 @@ F1<-ggmap(LPmap) +
   annotate("text", x = -67.0492, y = 17.9488, label= "AB", colour="white", fontface="bold", size=7)+
   annotate("text", x = -67.0492, y = 17.9605, label= "NQ", colour="white", fontface="bold", size=7)+
   annotate("text", x = -67.0142, y = 17.9680, label= "BB", colour="white", fontface="bold", size=7)+
-  annotate("text", x = -67.0213, y = 17.8635, label= "VL", colour="white", fontface="bold", size=9)
+  annotate("text", x = -67.0213, y = 17.8635, label= "VL", colour="white", fontface="bold", size=9)+
+  annotation_north_arrow(location="tl", style = north_arrow_fancy_orienteering(line_width = 2, line_col = "white", text_col = "white", text_size = 15))
+
   
 F1
+ggsave("LPMapRv.pdf", F1, width = 12, height = 7)
+
 
 ##Zoom In Map##
-
 
 dataMapZoom <- data %>% 
   dplyr::filter(Site =="AB"|
@@ -127,6 +149,19 @@ LPmapzoom <- get_googlemap(c(lon = -67.030399, lat = 17.962708),
 F2<-ggmap(LPmapzoom) +
   theme_classic()+
   ggtitle("B") +
+  ggsn::scalebar(x.min = -67.043, x.max = -67.050, y.min = 17.945, y.max = 17.948, 
+                 location = "bottomright", 
+                 dist = 200, 
+                 dist_unit = "m", 
+                 transform = TRUE, 
+                 model = "WGS84", 
+                 height = 0.15, 
+                 st.dist=0.2, 
+                 st.bottom= FALSE, 
+                 st.size = 4,  
+                 st.color = "white", 
+                 box.color = "black", 
+                 box.fill = c("black", "white"))+
   theme(
     plot.title=element_text(size=20),
     axis.title.x = element_text(size = 22),
@@ -144,11 +179,66 @@ F2<-ggmap(LPmapzoom) +
   scale_fill_manual(values=cols5, 
                     breaks = c("Veril","Acidification Buoy", "Enrique", "Bio Bay"))+
   annotate("text", x = -67.0510, y = 17.9516, label= "AB", colour="white", fontface="bold", size=10)+
-  annotate("text", x = -67.0504, y = 17.9576, label= "NQ", colour="white", fontface="bold", size=10)
+  annotate("text", x = -67.0504, y = 17.9576, label= "NQ", colour="white", fontface="bold", size=10)+
+  annotation_north_arrow(location="tl", style = north_arrow_fancy_orienteering(line_width = 2, line_col = "white", text_col = "white", text_size = 15))
 
 F2
+ggsave("LPMapZoomRv.pdf", F2, width = 12, height = 7)
 
-F1+F2
+
+##BB Zoom In Map##
+
+dataMapZoomBB <- data %>% 
+  dplyr::filter(Site =="BB") %>% 
+  subset(Date > "2018-01-01" & Date < "2019-12-31") %>% 
+  replace_with_na_all(condition=~.x==-999)
+
+
+LPmapzoomBB <- get_googlemap(c(lon = -67.014, lat = 17.971),
+                           zoom = 16, 
+                           maptype = "satellite", 
+                           force = FALSE)
+
+
+F3<-ggmap(LPmapzoomBB) +
+  theme_classic()+
+  ggtitle("C") +
+  ggsn::scalebar(x.min = -67.010, x.max = -67.014, y.min = 17.9662, y.max = 17.9670,
+                 location = "bottomright",
+                 dist = 100,
+                 dist_unit = "m",
+                 transform = TRUE,
+                 model = "WGS84",
+                 height = 0.15,
+                 st.dist=0.3,
+                 st.bottom= FALSE,
+                 st.size = 4,
+                 st.color = "white",
+                 box.color = "black",
+                 box.fill = c("black", "white"))+
+  theme(
+    plot.title=element_text(size=20),
+    axis.title.x = element_text(size = 22),
+    axis.text.x = element_text(size = 22),
+    axis.title.y = element_text(size = 22), 
+    axis.text.y = element_text(size = 22))+ 
+  scale_y_continuous(limits = c(17.9660, 17.9760), breaks = seq(17.9660, 17.9760, by = 0.004))+
+  scale_x_continuous(limits = c(-67.018, -67.009), breaks = seq(-67.018, -67.009, by = 0.004))+
+  ylab("Latitude")+
+  xlab("Longitude")+
+  geom_point(dataMapZoomBB, mapping=aes(x= Lon, y = Lat, shape=Site, fill=Site, size=5, stroke = 2), size = 8, color="white", show.legend = FALSE)+
+  scale_shape_manual(values=21, 
+                     breaks = "BB", 
+                     labels = "Bio Bay")+ 
+  scale_fill_manual(values=cols5, 
+                    breaks = "Bio Bay")+
+  annotate("text", x = -67.014, y = 17.9715, label= "BB", colour="white", fontface="bold", size=10)+
+  annotation_north_arrow(location="tl", style = north_arrow_fancy_orienteering(line_width = 2, line_col = "white", text_col = "white", text_size = 15))
+
+F3
+
+F1+F2+F3
+ggsave("LPMap_FinalRv.tiff", F1+F2, width = 12, height = 7)
 
 
 #### 4. Group by Site and Date, Calculate Average and Std.Dev ########
@@ -345,7 +435,7 @@ TimeseriesPlot2<-((TempGraph2/SalGraph2/pHGraph2/CNGraph2)|(POCGraph2/PONGraph2/
 TimeseriesPlot
 TimeseriesPlot2
   
-ggsave("ParameterTimeSeries_Final.tiff", TimeseriesPlot, width = 12, height = 7)
+ggsave("ParameterTimeSeries_Final.pdf", TimeseriesPlot, width = 12, height = 9)
 
 
 #### 6. Figure 3: Parameter Gradient (BoxPlot) Box Plot#### 
@@ -361,8 +451,8 @@ TempBox<-ggplot(data_mean, mapping = aes(Site, Temp)) +
   #scale_y_continuous(limits = c(25,32))+
   theme(
     axis.text.x = element_blank(),
-    axis.title.y = element_text(size=16),
-    axis.text.y = element_text(size = 16),
+    axis.title.y = element_text(size=18),
+    axis.text.y = element_text(size = 18),
     axis.line.x = element_blank(),
     axis.ticks.x = element_blank(),
     legend.position = "none")
@@ -378,8 +468,8 @@ SalBox<-ggplot(data_mean, mapping = aes(Site, Sal)) +
   #scale_y_continuous(limits = c(32,40))+
   theme(
     axis.text.x = element_blank(),
-    axis.title.y = element_text(size=16),
-    axis.text.y = element_text(size = 16),
+    axis.title.y = element_text(size=18),
+    axis.text.y = element_text(size = 18),
     axis.line.x = element_blank(),
     axis.ticks.x = element_blank(),
     legend.position = "none")
@@ -393,10 +483,10 @@ pHBox<-ggplot(data_mean, mapping = aes(Site, pH)) +
   theme_classic()+
   labs(x = NULL, y = expression(paste("pH "[T])))+
   theme(
-    axis.title.y = element_text(size=16),
-    axis.text.y = element_text(size = 16),
+    axis.title.y = element_text(size=18),
+    axis.text.y = element_text(size = 18),
     # axis.text.x = element_blank(),
-    axis.text.x = element_text(size = 16), 
+    axis.text.x = element_text(size = 18), 
     legend.position = "none")
 
 
@@ -411,8 +501,8 @@ POCBox<-ggplot(data_mean, aes(Site, POC_m)) +
   #scale_y_continuous(limits = c(0,800))+
   theme(
     axis.text.x = element_blank(),
-    axis.title.y = element_text(size=16),
-    axis.text.y = element_text(size = 16),
+    axis.title.y = element_text(size=18),
+    axis.text.y = element_text(size = 18),
     axis.line.x = element_blank(),
     axis.ticks.x = element_blank(),
     legend.position = "none")
@@ -427,8 +517,8 @@ PONBox<-ggplot(data_mean, mapping = aes(Site, PON_m)) +
   labs(x = NULL, y = expression(paste("PON ", (mg/m^3))))+
   theme(
     axis.text.x = element_blank(),
-    axis.title.y = element_text(size=16),
-    axis.text.y = element_text(size = 16),
+    axis.title.y = element_text(size=18),
+    axis.text.y = element_text(size = 18),
     axis.line.x = element_blank(),
     axis.ticks.x = element_blank(),
     legend.position = "none")
@@ -444,8 +534,8 @@ CIRBox<-ggplot(data_mean, mapping = aes(Site, d13C_m)) +
   #scale_y_continuous(limits = c(-60,0))+
   theme(
     axis.text.x = element_blank(),
-    axis.title.y = element_text(size=16),
-    axis.text.y = element_text(size = 16),
+    axis.title.y = element_text(size=18),
+    axis.text.y = element_text(size = 18),
     axis.line.x = element_blank(),
     axis.ticks.x = element_blank(),
     legend.position = "none")
@@ -460,9 +550,9 @@ NIRBox<-ggplot(data_mean, mapping = aes(Site, d15N_m)) +
   labs(x = NULL, y = expression(paste(delta^{15}, "N (\u2030)")))+
   #scale_y_continuous(limits = c(0,15))+
   theme(
-    axis.title.y = element_text(size=16),
-    axis.text.y = element_text(size = 16),
-    axis.text.x = element_text(size = 16), 
+    axis.title.y = element_text(size=18),
+    axis.text.y = element_text(size = 18),
+    axis.text.x = element_text(size = 18), 
     legend.position = "none")
 
 # CNBox<-ggplot(data_mean, mapping = aes(Site, CN_m)) +  
@@ -482,13 +572,13 @@ NIRBox<-ggplot(data_mean, mapping = aes(Site, d15N_m)) +
 BoxPlot <- ((TempBox/SalBox/pHBox)|(POCBox/PONBox/CIRBox/NIRBox)) +
   plot_layout(guides = "collect") 
 
-BoxPlot2 <- ((TempBox/SalBox/pHBox/CNBox)|(POCBox/PONBox/CIRBox/NIRBox)) +
-  plot_layout(guides = "collect") 
+# #BoxPlot2 <- ((TempBox/SalBox/pHBox/CNBox)|(POCBox/PONBox/CIRBox/NIRBox)) +
+#   plot_layout(guides = "collect") 
 
 BoxPlot
 BoxPlot2
 
-ggsave("ParameterGradient_Final.tiff", BoxPlot, width = 12, height = 7)
+ggsave("ParameterGradient_Final.pdf", BoxPlot, width = 12, height = 9)
 
 
 
@@ -542,7 +632,7 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
 
 PCAPlot
 
-ggsave("PrincipalComponentAnalysis.tiff", PCAPlot, width = 12, height = 7)
+ggsave("PrincipalComponentAnalysis.pdf", PCAPlot, width = 12, height = 7)
 
  
 #Scree Plot
