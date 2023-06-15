@@ -95,7 +95,7 @@ F1<-ggmap(LPmap) +
                  dist_unit = "m", 
                  transform = TRUE, 
                  model = "WGS84", 
-                 height = 0.05, 
+                 height = 0.15, 
                  st.dist=0.2, 
                  st.bottom= FALSE, 
                  st.size = 4,  
@@ -156,7 +156,7 @@ F2<-ggmap(LPmapzoom) +
                  transform = TRUE, 
                  model = "WGS84", 
                  height = 0.15, 
-                 st.dist=0.2, 
+                 st.dist=0.3, 
                  st.bottom= FALSE, 
                  st.size = 4,  
                  st.color = "white", 
@@ -203,14 +203,14 @@ LPmapzoomBB <- get_googlemap(c(lon = -67.014, lat = 17.971),
 F3<-ggmap(LPmapzoomBB) +
   theme_classic()+
   ggtitle("C") +
-  ggsn::scalebar(x.min = -67.010, x.max = -67.014, y.min = 17.9662, y.max = 17.9670,
+  ggsn::scalebar(x.min = -67.009, x.max = -67.012, y.min = 17.9662, y.max = 17.9670,
                  location = "bottomright",
                  dist = 100,
                  dist_unit = "m",
                  transform = TRUE,
                  model = "WGS84",
-                 height = 0.15,
-                 st.dist=0.3,
+                 height = 0.35,
+                 st.dist= 0.5,
                  st.bottom= FALSE,
                  st.size = 4,
                  st.color = "white",
@@ -237,8 +237,15 @@ F3<-ggmap(LPmapzoomBB) +
 
 F3
 
-F1+F2+F3
-ggsave("LPMap_FinalRv.tiff", F1+F2, width = 12, height = 7)
+LPMap_FinalRev<-F1+F2+F3
+
+LPMap_FinalRev[[1]] = LPMap_Rev[[1]] + theme(axis.title.x = element_blank())
+LPMap_FinalRev[[2]] = LPMap_Rev[[2]] + theme(axis.title.y = element_blank(), )
+LPMap_FinalRev[[3]] = LPMap_Rev[[3]] + theme(axis.title.y = element_blank(),
+                                        axis.title.x = element_blank())
+
+LPMap_FinalRev
+ggsave("LPMap_FinalRev.pdf", LPMap_FinalRev, width = 20, height = 7)
 
 
 #### 4. Group by Site and Date, Calculate Average and Std.Dev ########
@@ -262,8 +269,9 @@ data_mean <- data %>%
             Lat = mean(Lat), 
             Lon = mean(Lon))
 data_mean$Site <- factor(data_mean$Site, level = c("BB", "NQ", "AB", "VL"))
+print(data_mean)
   
-            
+
 
 #### 5. Figure 2: Timeseries Plot : Graph Mean & STDEV ########
 
@@ -323,7 +331,6 @@ pHGraph2 <- ggplot(data_mean, aes(x = Date , y = pH, fill=Site, shape = Site)) +
     axis.title.x = element_blank(),
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size =18))
-
 
 
 POCGraph2 <- ggplot(data_mean, aes(x = Date , y = POC_m, fill=Site, shape = Site)) + 
@@ -401,27 +408,27 @@ NIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d15N_m, fill=Site, shape=Site)
     axis.title.y = element_text(size=18),
     axis.text.y = element_text(size =18))
 
-# CNGraph2 <- ggplot(data_mean, aes(x = Date , y = CN_m, fill= Site, shape=Site)) +
-#   ggtitle("X")+
-#   geom_point(size = 4) +
-#   scale_shape_manual(values=c(21, 24, 23, 22))+
-#   scale_fill_manual(values=cols5)+
-#   geom_line()+
-#   geom_errorbar(aes(ymin = CN_m - CN_std, ymax = CN_m + CN_std))+
-#   theme_classic()+
-#   labs(x = NULL, y = "C:N") +
-#   scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
-#   theme(
-#     legend.position= "top",
-#     axis.text.x = element_text(size=16),
-#     axis.title.x = element_blank(),
-#     axis.title.y = element_text(size=18),
-#     axis.text.y = element_text(size = 18),
-#     #axis.line.x = element_blank(),
-#     axis.ticks.x = element_blank())
+CNGraph2 <- ggplot(data_mean, aes(x = Date , y = CN_m, fill= Site, shape=Site)) +
+  ggtitle("X")+
+  geom_point(size = 4) +
+  scale_shape_manual(values=c(21, 24, 23, 22))+
+  scale_fill_manual(values=cols5)+
+  geom_line()+
+  geom_errorbar(aes(ymin = CN_m - CN_std, ymax = CN_m + CN_std))+
+  theme_classic()+
+  labs(x = NULL, y = "C:N") +
+  scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
+  theme(
+    legend.position= "top",
+    axis.text.x = element_text(size=16),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size=18),
+    axis.text.y = element_text(size = 18),
+    #axis.line.x = element_blank(),
+    axis.ticks.x = element_blank())
 
 
-TimeseriesPlot<-((TempGraph2/SalGraph2/pHGraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2)) +   plot_layout(guides='collect') &
+TimeseriesPlot<-((TempGraph2/SalGraph2/pHGraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2)) + plot_layout(guides='collect') &
   theme(legend.position = "bottom",
         legend.title = element_text(size=16), 
         legend.text = element_text(size=16))
@@ -555,19 +562,19 @@ NIRBox<-ggplot(data_mean, mapping = aes(Site, d15N_m)) +
     axis.text.x = element_text(size = 18), 
     legend.position = "none")
 
-# CNBox<-ggplot(data_mean, mapping = aes(Site, CN_m)) +  
-#   ggtitle("X")+
-#   geom_boxplot(aes(fill = Site))+
-#   geom_jitter(width = 0.1)+
-#   scale_fill_manual(values=cols5)+
-#   theme_classic()+
-#   labs(x = NULL, y = expression(paste("C:N")))+
-#   theme(
-#     axis.title.y = element_text(size=16),
-#     axis.text.y = element_text(size = 16),
-#     axis.text.x = element_text(size = 16), 
-#     legend.position = "none")
-# CNBox
+CNBox<-ggplot(data_mean, mapping = aes(Site, CN_m)) +
+  ggtitle("X")+
+  geom_boxplot(aes(fill = Site))+
+  geom_jitter(width = 0.1)+
+  scale_fill_manual(values=cols5)+
+  theme_classic()+
+  labs(x = NULL, y = expression(paste("C:N")))+
+  theme(
+    axis.title.y = element_text(size=16),
+    axis.text.y = element_text(size = 16),
+    axis.text.x = element_text(size = 16),
+    legend.position = "none")
+CNBox
 
 BoxPlot <- ((TempBox/SalBox/pHBox)|(POCBox/PONBox/CIRBox/NIRBox)) +
   plot_layout(guides = "collect") 
@@ -598,8 +605,8 @@ data_pca <- data %>%
 data_pca$Site<-factor(data_pca$Site, c("BB", "NQ", "AB", "VL"))
 
 data_pca = na.omit(data_pca)
-pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
-#pca <- prcomp(data_pca[c(3:10)], center = TRUE, scale. = TRUE) #para incluir C:N
+#pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
+pca <- prcomp(data_pca[c(3:10)], center = TRUE, scale. = TRUE) #para incluir C:N
 
 pca
 summary(pca)
