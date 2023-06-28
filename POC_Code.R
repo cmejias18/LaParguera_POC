@@ -4,6 +4,7 @@
 library(rstudioapi)
 library(ggmap)
 library(tidyverse)
+library(dplyr)
 library(lubridate)
 library(naniar)
 library(dunn.test)
@@ -18,25 +19,14 @@ library(ggspatial)
 library(ggsn)
 
 
-#Pending to eliminate Libraries
-library(rgdal)
-library(raster)
-library(sf)
-library(ggrepel)
-library(FSA)
-library(plotly)
-library(rstatix)
-#library(ggstatplot)
-
-
-
 #### 2. Insert Dataset (.csv) #############
 
 
-data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%   
+data <- read_csv("DB_AnalsisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%   
   dplyr::rename(
     Date = "Sampling Date", 
     Site = "Sample Site", 
+    Depth = "Total Depth (m)",
     Lon = "Long", 
     FVol = "Filt.Vol (L)", 
     CIR = "13C", 
@@ -47,7 +37,7 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
     DIC = "DIC (UMOL/KG)",
     TA = "TA (UMOL/KG)") %>%
   dplyr::mutate(
-    CN = POC/PON) %>% 
+    "CN" = POC/PON) %>% 
   dplyr::filter(Site =="AB"|
            Site == "BB"|
            Site == "NQ"|
@@ -57,11 +47,9 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
   replace_with_na_all(condition=~.x==-999)
 
 
-
-
 #### 3. Figure 1: Map & Stations ########
 
-register_google(key = 'AIzaSyBAkWwL25eBEQFJf4n9Rc2sKQbxSAqu7To')
+register_google(key = '...')
 
 cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#92c5de', "VL" = '#2166ac')
 
@@ -252,25 +240,25 @@ ggsave("LPMap_FinalRev.pdf", LPMap_FinalRev, width = 20, height = 7)
 
 data_mean <- data %>% 
   group_by(Site,Date) %>% 
-  dplyr::summarize(
-            d13C_m=mean(CIR),
-            d13C_std=sd(CIR),
-            d15N_m=mean(NIR),
-            d15N_std=sd(NIR),
-            POC_m=mean(POC),
-            POC_std=sd(POC),
-            PON_m=mean(PON),
-            PON_std=sd(PON), 
+  dplyr::summarise(
+            d13C_M=mean(CIR),
+            d13C_SD=sd(CIR),
+            d15N_M=mean(NIR),
+            d15N_SD=sd(NIR),
+            POC_M=mean(POC),
+            POC_SD=sd(POC),
+            PON_M=mean(PON),
+            PON_SD=sd(PON), 
             Temp = mean(Temp),
             Sal = mean(Sal), 
             pH = mean(pH),
-            CN_m = mean(CN),
-            CN_std=sd(CN),
+            CN_M = mean(CN),
+            CN_SD =sd(CN),
+            TDepth = mean(Depth),
             Lat = mean(Lat), 
             Lon = mean(Lon))
 data_mean$Site <- factor(data_mean$Site, level = c("BB", "NQ", "AB", "VL"))
 print(data_mean)
-  
 
 
 #### 5. Figure 2: Timeseries Plot : Graph Mean & STDEV ########
@@ -333,13 +321,13 @@ pHGraph2 <- ggplot(data_mean, aes(x = Date , y = pH, fill=Site, shape = Site)) +
     axis.text.y = element_text(size =18))
 
 
-POCGraph2 <- ggplot(data_mean, aes(x = Date , y = POC_m, fill=Site, shape = Site)) + 
+POCGraph2 <- ggplot(data_mean, aes(x = Date , y = POC_M, fill=Site, shape = Site)) + 
   ggtitle("D")+
   geom_point(size=4) + 
   geom_line()+
   scale_shape_manual(values=c(21, 24, 23, 22))+
   scale_fill_manual(values=cols5)+ 
-  geom_errorbar(aes(ymin = POC_m - POC_std, ymax = POC_m + POC_std)) +
+  geom_errorbar(aes(ymin = POC_M - POC_SD, ymax = POC_M + POC_SD)) +
   theme_classic() +
   labs(x = NULL, y = expression(paste("POC ", (mg/m^3)))) +
   scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01")))+
@@ -352,13 +340,13 @@ POCGraph2 <- ggplot(data_mean, aes(x = Date , y = POC_m, fill=Site, shape = Site
     axis.ticks.x = element_blank())
 
 
-PONGraph2 <- ggplot(data_mean, aes(x = Date , y = PON_m, fill=Site, shape=Site)) + 
+PONGraph2 <- ggplot(data_mean, aes(x = Date , y = PON_M, fill=Site, shape=Site)) + 
   ggtitle("E")+
   geom_point(size=4) +
   geom_line()+
   scale_shape_manual(values=c(21, 24, 23, 22))+
   scale_fill_manual(values=cols5)+ 
-  geom_errorbar(aes(ymin = PON_m - PON_std, ymax =PON_m + PON_std)) + 
+  geom_errorbar(aes(ymin = PON_M - PON_SD, ymax =PON_M + PON_SD)) + 
   theme_classic() +
   labs(x = NULL, y = expression(paste("PON ", (mg/m^3)))) +
   scale_x_date(limits = as.Date(c("2018-07-01 ", "2019-08-01"))) +
@@ -372,13 +360,13 @@ PONGraph2 <- ggplot(data_mean, aes(x = Date , y = PON_m, fill=Site, shape=Site))
     axis.ticks.x = element_blank())
 
 
-CIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d13C_m , fill=Site, shape=Site)) +   
+CIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d13C_M , fill=Site, shape=Site)) +   
   ggtitle("F")+
   geom_point(size = 4) + 
   geom_line() +
   scale_shape_manual(values=c(21, 24, 23, 22))+
   scale_fill_manual(values=cols5)+ 
-  geom_errorbar(aes(ymin = d13C_m - d13C_std, ymax = d13C_m + d13C_std)) + 
+  geom_errorbar(aes(ymin = d13C_M - d13C_SD, ymax = d13C_M + d13C_SD)) + 
   theme_classic() + 
   labs(x = NULL, y = expression(paste(delta^{13}, "C (\u2030)"))) +
   scale_x_date(limits = as.Date(c("2018-07-01 ", "2019-08-01")))+
@@ -392,13 +380,13 @@ CIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d13C_m , fill=Site, shape=Site
     axis.ticks.x = element_blank())
  
 
-NIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d15N_m, fill=Site, shape=Site)) + 
+NIRGraph2 <- ggplot(data_mean, aes(x = Date , y = d15N_M, fill=Site, shape=Site)) + 
   ggtitle("G")+
   geom_point(size=4) + 
   geom_line()+
   scale_shape_manual(values=c(21, 24, 23, 22))+
   scale_fill_manual(values=cols5)+ 
-  geom_errorbar(aes(ymin = d15N_m - d15N_std, ymax = d15N_m + d15N_std)) + 
+  geom_errorbar(aes(ymin = d15N_M - d15N_std, ymax = d15N_M + d15N_std)) + 
   theme_classic() +
   labs(x = NULL, y = expression(paste(delta^{15}, "N (\u2030)"))) +
   scale_x_date(limits = as.Date(c("2018-07-01 ", "2019-08-01"))) +
@@ -497,10 +485,10 @@ pHBox<-ggplot(data_mean, mapping = aes(Site, pH)) +
     legend.position = "none")
 
 
-POCBox<-ggplot(data_mean, aes(Site, POC_m)) +  
+POCBox<-ggplot(data_mean, aes(Site, POC_M)) +  
   ggtitle("D")+
   geom_boxplot(aes(fill = Site))+
-  #geom_errorbar(aes(ymin = POC_m - POC_std, ymax = POC_m + POC_std))+
+  #geom_errorbar(aes(ymin = POC_M - POC_SD, ymax = POC_M + POC_SD))+
   geom_jitter(width = 0.1)+
   scale_fill_manual(values=cols5)+
   theme_classic()+
@@ -515,7 +503,7 @@ POCBox<-ggplot(data_mean, aes(Site, POC_m)) +
     legend.position = "none")
 
 
-PONBox<-ggplot(data_mean, mapping = aes(Site, PON_m)) +  
+PONBox<-ggplot(data_mean, mapping = aes(Site, PON_M)) +  
   ggtitle("E")+
   geom_boxplot(aes(fill = Site))+
   geom_jitter(width = 0.1)+
@@ -531,7 +519,7 @@ PONBox<-ggplot(data_mean, mapping = aes(Site, PON_m)) +
     legend.position = "none")
 
 
-CIRBox<-ggplot(data_mean, mapping = aes(Site, d13C_m)) +  
+CIRBox<-ggplot(data_mean, mapping = aes(Site, d13C_M)) +  
   ggtitle("F")+
   geom_boxplot(aes(fill = Site))+
   geom_jitter(width = 0.1)+
@@ -548,7 +536,7 @@ CIRBox<-ggplot(data_mean, mapping = aes(Site, d13C_m)) +
     legend.position = "none")
 
 
-NIRBox<-ggplot(data_mean, mapping = aes(Site, d15N_m)) +  
+NIRBox<-ggplot(data_mean, mapping = aes(Site, d15N_M)) +  
   ggtitle("G")+
   geom_boxplot(aes(fill = Site))+
   geom_jitter(width = 0.1)+
@@ -601,29 +589,30 @@ data_pca <- data %>%
     Temp = mean(Temp),
     Sal = mean(Sal), 
     pH = mean(pH), 
-    CN = mean(CN))
+    "C:N" = mean(CN), 
+    TDepth = mean(Depth))
 data_pca$Site<-factor(data_pca$Site, c("BB", "NQ", "AB", "VL"))
 
 data_pca = na.omit(data_pca)
 #pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
-pca <- prcomp(data_pca[c(3:10)], center = TRUE, scale. = TRUE) #para incluir C:N
+pca <- prcomp(data_pca[c(3:11)], center = TRUE, scale. = TRUE) #para incluir C:N & Depth
 
 pca
 summary(pca)
 
-PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10, 
+PCAPlot<-ggbiplot(pca, obs.scale = 2.3, var.scale = 1, size=2, 
                   group = data_pca$Site,
                   varname.size=5,
-                  labels.size=5, 
+                  labels.size=5,
                   ellipse = TRUE, 
-                  circle = FALSE,  
+                  circle = FALSE,
                   label.repel = TRUE)+ 
   geom_point(aes(shape=data_pca$Site,fill=data_pca$Site), size = 8)+
   scale_shape_manual(name="Site", values=c(21, 24, 23, 22))+
   scale_color_manual(name="Site", values=cols5) +
-  scale_fill_manual(name="Site", values=cols5) + 
+  scale_fill_manual(name="Site", values=cols5) +
   labs(
-    x = "PC1 (45.5%)", 
+    x = "PC1 (45.5%)",
     y = "PC2 (18.1%)")+
   theme_classic()+
   theme(
@@ -636,10 +625,15 @@ PCAPlot<-ggbiplot(pca, obs.scale = 1, var.scale = 1, size=10,
     axis.title.x = element_text(size=22),
     axis.text.x = element_text(size = 22, color = "black"))
 
+seg <- which(sapply(PCAPlot$layers, function(x) class(x$geom)[1] == 'GeomSegment'))
+PCAPlot$layers[[seg]]$aes_params$colour <- 'black'
+
+txt <- which(sapply(PCAPlot$layers, function(x) class(x$geom)[1] == 'GeomText'))
+PCAPlot$layers[[txt]]$aes_params$colour <- 'black'
 
 PCAPlot
 
-ggsave("PrincipalComponentAnalysis.pdf", PCAPlot, width = 12, height = 7)
+ggsave("PCA_Rev.pdf", PCAPlot, width = 12, height = 7)
 
  
 #Scree Plot
@@ -681,41 +675,41 @@ summary(pH3)#Site and Month are a significant predictor of pH
 check_model(pH3) #model assumptions appear to be mostly okay here
 TukeyHSD(pH3, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
 
-poc0=aov(POC_m~1,data=data_mean) #null model
-poc1=aov(POC_m~Site,data=data_mean) #Site as a predictor of POC
-poc2=aov(POC_m~Month,data=data_mean) #Month as a predictor of POC
-poc3=aov(POC_m~Site+Month,data=data_mean) #Site + Month as predictors of POC
-poc4=aov(POC_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of POC
+poc0=aov(POC_M~1,data=data_mean) #null model
+poc1=aov(POC_M~Site,data=data_mean) #Site as a predictor of POC
+poc2=aov(POC_M~Month,data=data_mean) #Month as a predictor of POC
+poc3=aov(POC_M~Site+Month,data=data_mean) #Site + Month as predictors of POC
+poc4=aov(POC_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of POC
 AIC(poc0,poc1,poc2,poc3,poc4) #AIC of all models included, t1 has the lowest AIC and is the best model to fit the data
 summary(poc1) #Site is a significant predictor of POC
 check_model(poc1) #model assumptions appear to be mostly okay here
 TukeyHSD(poc1, conf.level=.95) #BB POC > AB POC, NQ POC < BB POC, VL POC < BB POC
 
-PON0=aov(PON_m~1,data=data_mean) #null model
-PON1=aov(PON_m~Site,data=data_mean) #Site as a predictor of PON
-PON2=aov(PON_m~Month,data=data_mean) #Month as a predictor of PON
-PON3=aov(PON_m~Site+Month,data=data_mean) #Site + Month as predictors of PON
-PON4=aov(PON_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of PON
+PON0=aov(PON_M~1,data=data_mean) #null model
+PON1=aov(PON_M~Site,data=data_mean) #Site as a predictor of PON
+PON2=aov(PON_M~Month,data=data_mean) #Month as a predictor of PON
+PON3=aov(PON_M~Site+Month,data=data_mean) #Site + Month as predictors of PON
+PON4=aov(PON_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of PON
 AIC(PON0,PON1,PON2,PON3,PON4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
 summary(PON1) #Site and Month are a significant predictor of PON
 check_model(PON1) #model assumptions appear to be mostly okay here
 TukeyHSD(PON1, conf.level=.95) #BB PON > AB PON, NQ PON > AB PON, VL PON < AB PON, VL PON < BB PON, VL PON < NQ PON
 
-d13C0=aov(d13C_m~1,data=data_mean) #null model
-d13C1=aov(d13C_m~Site,data=data_mean) #Site as a predictor of d13C
-d13C2=aov(d13C_m~Month,data=data_mean) #Month as a predictor of d13C
-d13C3=aov(d13C_m~Site+Month,data=data_mean) #Site + Month as predictors of d13C
-d13C4=aov(d13C_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d13C
+d13C0=aov(d13C_M~1,data=data_mean) #null model
+d13C1=aov(d13C_M~Site,data=data_mean) #Site as a predictor of d13C
+d13C2=aov(d13C_M~Month,data=data_mean) #Month as a predictor of d13C
+d13C3=aov(d13C_M~Site+Month,data=data_mean) #Site + Month as predictors of d13C
+d13C4=aov(d13C_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d13C
 AIC(d13C0,d13C1,d13C2,d13C3,d13C4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
 summary(d13C1) #Site and Month are a significant predictor of d13C
 check_model(d13C1) #model assumptions appear to be mostly okay here
 TukeyHSD(d13C1, conf.level=.95) #BB d13C > AB d13C, NQ d13C > AB d13C, VL d13C < AB d13C, VL d13C < BB d13C, VL d13C < NQ d13C
 
-d15N0=aov(d15N_m~1,data=data_mean) #null model
-d15N1=aov(d15N_m~Site,data=data_mean) #Site as a predictor of d15N
-d15N2=aov(d15N_m~Month,data=data_mean) #Month as a predictor of d15N
-d15N3=aov(d15N_m~Site+Month,data=data_mean) #Site + Month as predictors of d15N
-d15N4=aov(d15N_m~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d15N
+d15N0=aov(d15N_M~1,data=data_mean) #null model
+d15N1=aov(d15N_M~Site,data=data_mean) #Site as a predictor of d15N
+d15N2=aov(d15N_M~Month,data=data_mean) #Month as a predictor of d15N
+d15N3=aov(d15N_M~Site+Month,data=data_mean) #Site + Month as predictors of d15N
+d15N4=aov(d15N_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d15N
 AIC(d15N0,d15N1,d15N2,d15N3,d15N4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
 summary(d15N4) #Site and Month are a significant predictor of d15N
 check_model(d15N4) #model assumptions appear to be mostly okay here
@@ -745,9 +739,6 @@ models = list(Temperature=(temp3),
 modelsummary(models,estimate="{p.value}",statistic=NULL,output = "TableS1.docx",title = 'p-values and summary statistics are reported for the best AIC model selected for each parameter. All site-level p-values are relative to the Bioluminescent Bay Site and all month p-values are relative to January.')
 
 
-
-
-
 #### 9.Computing correlation matrix####
 correlation_matrix <- round(cor(as.data.frame(as.numeric(data_pca[complete.cases(data_pca[,2:8]),]))),1)
 
@@ -759,3 +750,46 @@ corrp.mat <- cor_pmat(data_pca)
 ggcorrplot(correlation_matrix, method ="square")
 ggcorrplot(correlation_matrix, method ="circle")
 
+
+####10. Data Summary Table ####
+
+library(gtsummary)
+
+data_sum <- data %>% 
+  group_by(Site) %>% 
+  dplyr::summarise(
+    TDepth = mean(Depth), 
+    Temp = mean(Temp),
+    Sal = mean(Sal), 
+    pH = mean(pH),
+    POC=mean(POC),
+    POC_SD=sd(POC),
+    PON=mean(PON),
+    PON_SD=sd(PON), 
+    CN = mean(CN),
+    CN_SD = sd(CN),
+    d13C=mean(CIR),
+    d13C_SD=sd(CIR),
+    d15N=mean(NIR),
+    d15N_SD=sd(NIR))
+data_sum$Site <- factor(data_sum$Site, level = c("BB", "NQ", "AB", "VL"))
+print(data_sum)
+
+# tbl_summary(data_sum, by=Site)
+# 
+# dplyr::gt_table(data_sum)
+# 
+# 
+# grid.draw(data_sum)
+
+
+
+####11. PRECIPITATION####
+prcp <- read_csv("Precip2018-2019.csv")
+
+merge(Precip2018-2019,DB_AnalsisR_OutlierRemoved.csv, by.x= Rain_in,
+      by.y= Date)
+
+Prcp_cs <- ave(prcp$Rain_in),                      # Apply ave function
+           data$group,
+           FUN = cumsum)
