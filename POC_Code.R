@@ -22,7 +22,7 @@ library(ggsn)
 #### 2. Insert Dataset (.csv) #############
 
 
-data <- read_csv("DB_AnalsisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%   
+data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%   
   dplyr::rename(
     Date = "Sampling Date", 
     Site = "Sample Site", 
@@ -594,7 +594,7 @@ data_pca <- data %>%
 data_pca$Site<-factor(data_pca$Site, c("BB", "NQ", "AB", "VL"))
 
 data_pca = na.omit(data_pca)
-#pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
+pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
 pca <- prcomp(data_pca[c(3:11)], center = TRUE, scale. = TRUE) #para incluir C:N & Depth
 
 pca
@@ -772,24 +772,41 @@ data_sum <- data %>%
     d13C_SD=sd(CIR),
     d15N=mean(NIR),
     d15N_SD=sd(NIR))
+
 data_sum$Site <- factor(data_sum$Site, level = c("BB", "NQ", "AB", "VL"))
 print(data_sum)
 
-# tbl_summary(data_sum, by=Site)
-# 
-# dplyr::gt_table(data_sum)
-# 
-# 
-# grid.draw(data_sum)
+data_sum %>% 
+  tbl_summary(
+    #include = everything(),
+    by = Site) %>%  
+    add_n() %>% 
+  modify_header(label~"**Site**")
+
+
+data_sum %>% 
+  gt_table %>% 
+  cols_label(
+    TDepth = md("Total Depth"), 
+    Temp = md("Temperature"), 
+    Sal = md("Salinity"),
+    pH = md("pH")
+  )
+
 
 
 
 ####11. PRECIPITATION####
-prcp <- read_csv("Precip2018-2019.csv")
 
-merge(Precip2018-2019,DB_AnalsisR_OutlierRemoved.csv, by.x= Rain_in,
-      by.y= Date)
+library(RcppRoll)
 
-Prcp_cs <- ave(prcp$Rain_in),                      # Apply ave function
-           data$group,
-           FUN = cumsum)
+prcp <- read_csv("Precip2018_2019.csv", col_types = cols(`Date` = col_date(format = "%m/%d/%Y")))
+
+prcp_cs<-prcp %>% 
+  group_by(Date) %>% 
+  summarise(sum = list(roll_sum(Rain_in, n)), seq = list(seq_len(n() -n + 1))) %>%
+  unnest()
+
+prcp_cs <- prcp %>% 
+  group_by(Date) %>% 
+  dplyr::mutate(cs=cumsum(Rain_in))
