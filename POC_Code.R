@@ -46,6 +46,17 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
   subset(Date > "2018-01-01" & Date < "2019-12-31") %>% 
   replace_with_na_all(condition=~.x==-999)
 
+precip <- read_csv("Precip2018_2019.csv") 
+
+precip14days = 
+  precip %>% 
+  mutate(Date = as.Date(Date, "%m/%d/%Y"))%>% 
+  complete(Date = seq.Date(min(Date), max(Date), by="day")) %>% 
+  mutate(Rain_in_14days = sum_run(x = Rain_in, k = 14, idx = as.Date(Date, format = "%m/%d/%Y"))) 
+
+
+data2 <- merge(data, precip14days, by.x = "Date", all.x = TRUE)%>% 
+  dplyr::select(-c(Month, MonthNo, Rain_in))
 
 #### 3. Figure 1: Map & Stations ########
 
@@ -259,7 +270,6 @@ data_mean <- data %>%
             Lon = mean(Lon))
 data_mean$Site <- factor(data_mean$Site, level = c("BB", "NQ", "AB", "VL"))
 print(data_mean)
-
 
 #### 5. Figure 2: Timeseries Plot : Graph Mean & STDEV ########
 
@@ -579,7 +589,7 @@ ggsave("ParameterGradient_Final.pdf", BoxPlot, width = 12, height = 9)
 
 #### 7. Figure 4: PCA ########
 
-data_pca <- data %>% 
+data_pca <- data2 %>% 
   group_by(Site,Date) %>% 
   dplyr::summarize(
     d13C = mean(CIR),
@@ -588,14 +598,14 @@ data_pca <- data %>%
     PON = mean(PON),
     Temp = mean(Temp),
     Sal = mean(Sal), 
-    pH = mean(pH), 
-    "C:N" = mean(CN), 
-    TDepth = mean(Depth))
+    pH = mean(pH),
+    "C:N" = mean(CN),
+    TDepth = mean(Depth),
+    Precipitation = Rain_in_14days)
 data_pca$Site<-factor(data_pca$Site, c("BB", "NQ", "AB", "VL"))
-
 data_pca = na.omit(data_pca)
-pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
-pca <- prcomp(data_pca[c(3:11)], center = TRUE, scale. = TRUE) #para incluir C:N & Depth
+#pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
+pca <- prcomp(data_pca[c(3:12)], center = TRUE, scale. = TRUE) #to include C:N & Depth
 
 pca
 summary(pca)
@@ -635,9 +645,6 @@ PCAPlot
 
 ggsave("PCA_Rev.pdf", PCAPlot, width = 12, height = 7)
 
- 
-#Scree Plot
-ggscreeplot(pca)
 fviz_eig(pca)
 
 
@@ -739,7 +746,7 @@ models = list(Temperature=(temp3),
 modelsummary(models,estimate="{p.value}",statistic=NULL,output = "TableS1.docx",title = 'p-values and summary statistics are reported for the best AIC model selected for each parameter. All site-level p-values are relative to the Bioluminescent Bay Site and all month p-values are relative to January.')
 
 
-#### 9.Computing correlation matrix####
+#### 9. Computing correlation matrix####
 correlation_matrix <- round(cor(as.data.frame(as.numeric(data_pca[complete.cases(data_pca[,2:8]),]))),1)
 
 # Computing correlation matrix with p-values
@@ -753,60 +760,32 @@ ggcorrplot(correlation_matrix, method ="circle")
 
 ####10. Data Summary Table ####
 
-library(gtsummary)
-
 data_sum <- data %>% 
   group_by(Site) %>% 
   dplyr::summarise(
-    TDepth = mean(Depth), 
-    Temp = mean(Temp),
-    Sal = mean(Sal), 
-    pH = mean(pH),
-    POC=mean(POC),
-    POC_SD=sd(POC),
-    PON=mean(PON),
-    PON_SD=sd(PON), 
-    CN = mean(CN),
-    CN_SD = sd(CN),
-    d13C=mean(CIR),
-    d13C_SD=sd(CIR),
-    d15N=mean(NIR),
-    d15N_SD=sd(NIR))
+    Depth = mean(Depth,na.rm=TRUE), 
+    Tempm = mean(Temp,na.rm=TRUE),
+    Temp_sd = sd(Temp,na.rm=TRUE),
+    Salm = mean(Sal,na.rm=TRUE), 
+    Sal_sd = sd(Sal,na.rm=TRUE), 
+    pHm = mean(pH,na.rm=TRUE),
+    pH_sd = sd(pH,na.rm=TRUE),
+    POCm=mean(POC,na.rm=TRUE),
+    POC_SD=sd(POC,na.rm=TRUE),
+    PONm=mean(PON,na.rm=TRUE),
+    PON_SD=sd(PON,na.rm=TRUE), 
+    CNm = mean(CN,na.rm=TRUE),
+    CN_SD = sd(CN,na.rm=TRUE),
+    d13C=mean(CIR,na.rm=TRUE),
+    d13C_SD=sd(CIR,na.rm=TRUE),
+    d15N=mean(NIR,na.rm=TRUE),
+    d15N_SD=sd(NIR,na.rm=TRUE)) %>% 
+  dplyr::rename(Temp = Tempm) %>% 
+  dplyr::rename(Sal = Salm) %>% 
+  dplyr::rename(pH = pHm) %>% 
+  dplyr::rename(POC = POCm) %>% 
+  dplyr::rename(PON = PONm) %>% 
+  dplyr::rename(CN = CNm) 
 
-data_sum$Site <- factor(data_sum$Site, level = c("BB", "NQ", "AB", "VL"))
-print(data_sum)
+write.csv(data_sum,"C:/Users/clmej/OneDrive - University of Puerto Rico/PhD/POC Project/Analysis/LaParguera_POC\\data_sum.csv", row.names=FALSE)
 
-data_sum %>% 
-  tbl_summary(
-    #include = everything(),
-    by = Site) %>%  
-    add_n() %>% 
-  modify_header(label~"**Site**")
-
-
-data_sum %>% 
-  gt_table %>% 
-  cols_label(
-    TDepth = md("Total Depth"), 
-    Temp = md("Temperature"), 
-    Sal = md("Salinity"),
-    pH = md("pH")
-  )
-
-
-
-
-####11. PRECIPITATION####
-
-library(RcppRoll)
-
-prcp <- read_csv("Precip2018_2019.csv", col_types = cols(`Date` = col_date(format = "%m/%d/%Y")))
-
-prcp_cs<-prcp %>% 
-  group_by(Date) %>% 
-  summarise(sum = list(roll_sum(Rain_in, n)), seq = list(seq_len(n() -n + 1))) %>%
-  unnest()
-
-prcp_cs <- prcp %>% 
-  group_by(Date) %>% 
-  dplyr::mutate(cs=cumsum(Rain_in))
