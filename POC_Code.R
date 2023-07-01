@@ -19,8 +19,7 @@ library(ggspatial)
 library(ggsn)
 
 
-#### 2. Insert Dataset (.csv) #############
-
+#### 2. Insert Datasets (.csv) ####
 
 data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling Date` = col_date(format = "%m/%d/%Y")))%>%   
   dplyr::rename(
@@ -48,7 +47,7 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
 
 precip <- read_csv("Precip2018_2019.csv") 
 
-precip14days = 
+precip14days <-
   precip %>% 
   mutate(Date = as.Date(Date, "%m/%d/%Y"))%>% 
   complete(Date = seq.Date(min(Date), max(Date), by="day")) %>% 
@@ -57,6 +56,27 @@ precip14days =
 
 data2 <- merge(data, precip14days, by.x = "Date", all.x = TRUE)%>% 
   dplyr::select(-c(Month, MonthNo, Rain_in))
+
+#Plot of Precipitation Rolling SumCum 14 days
+Precip_plot <- ggplot(precip14days, aes(x = Date , y = Rain_in_14days)) + 
+  ggtitle("A")+
+  geom_point(size = 4) + 
+  # scale_shape_manual(values=c(21, 24, 23, 22))+ 
+  # scale_fill_manual(values=cols5)             
+  #geom_line()+
+  # geom_errorbar(aes(ymin = Temp, ymax = Temp))+
+  theme_classic()+
+  labs(x = "Date", y = "Precipitation (in)")
+  scale_x_date(limits = as.Date(c("2018-01-01", "2019-12-31")))
+  # theme(
+  #   axis.text.x = element_blank(),
+  #   axis.title.x = element_blank(), 
+  #   axis.title.y = element_text(size=18),
+  #   axis.text.y = element_text(size = 18), 
+  #   axis.line.x = element_blank(),
+  #   axis.ticks.x = element_blank())
+Precip_plot
+
 
 #### 3. Figure 1: Map & Stations ########
 
@@ -596,21 +616,22 @@ data_pca <- data2 %>%
     d15N = mean(NIR),
     POC = mean(POC),
     PON = mean(PON),
-    Temp = mean(Temp),
-    Sal = mean(Sal), 
+    Temperature = mean(Temp),
+    Salinity = mean(Sal), 
     pH = mean(pH),
     "C:N" = mean(CN),
     TDepth = mean(Depth),
     Precipitation = Rain_in_14days)
 data_pca$Site<-factor(data_pca$Site, c("BB", "NQ", "AB", "VL"))
 data_pca = na.omit(data_pca)
-#pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE)
-pca <- prcomp(data_pca[c(3:12)], center = TRUE, scale. = TRUE) #to include C:N & Depth
+#pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE) #initial PCA
+pca <- prcomp(data_pca[c(3:12)], center = TRUE, scale. = TRUE) #to include C:N, Depth, and precipitation
 
 pca
 summary(pca)
+fviz_eig(pca)
 
-PCAPlot<-ggbiplot(pca, obs.scale = 2.3, var.scale = 1, size=2, 
+PCAPlot<-ggbiplot(pca, obs.scale = 2.2, var.scale = 1, size=2, 
                   group = data_pca$Site,
                   varname.size=5,
                   labels.size=5,
@@ -622,8 +643,8 @@ PCAPlot<-ggbiplot(pca, obs.scale = 2.3, var.scale = 1, size=2,
   scale_color_manual(name="Site", values=cols5) +
   scale_fill_manual(name="Site", values=cols5) +
   labs(
-    x = "PC1 (45.5%)",
-    y = "PC2 (18.1%)")+
+    x = "PC1 (35%)",
+    y = "PC2 (16%)")+
   theme_classic()+
   theme(
     legend.direction = 'horizontal',
@@ -644,8 +665,6 @@ PCAPlot$layers[[txt]]$aes_params$colour <- 'black'
 PCAPlot
 
 ggsave("PCA_Rev.pdf", PCAPlot, width = 12, height = 7)
-
-fviz_eig(pca)
 
 
 #### 8. Stats: ANOVA & Models ####
