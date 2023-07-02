@@ -5,6 +5,7 @@ library(rstudioapi)
 library(ggmap)
 library(tidyverse)
 library(dplyr)
+library(runner)
 library(lubridate)
 library(naniar)
 library(dunn.test)
@@ -61,20 +62,10 @@ data2 <- merge(data, precip14days, by.x = "Date", all.x = TRUE)%>%
 Precip_plot <- ggplot(precip14days, aes(x = Date , y = Rain_in_14days)) + 
   ggtitle("A")+
   geom_point(size = 4) + 
-  # scale_shape_manual(values=c(21, 24, 23, 22))+ 
-  # scale_fill_manual(values=cols5)             
-  #geom_line()+
-  # geom_errorbar(aes(ymin = Temp, ymax = Temp))+
   theme_classic()+
   labs(x = "Date", y = "Precipitation (in)")
   scale_x_date(limits = as.Date(c("2018-01-01", "2019-12-31")))
-  # theme(
-  #   axis.text.x = element_blank(),
-  #   axis.title.x = element_blank(), 
-  #   axis.title.y = element_text(size=18),
-  #   axis.text.y = element_text(size = 18), 
-  #   axis.line.x = element_blank(),
-  #   axis.ticks.x = element_blank())
+
 Precip_plot
 
 
@@ -806,5 +797,5 @@ data_sum <- data %>%
   dplyr::rename(PON = PONm) %>% 
   dplyr::rename(CN = CNm) 
 
-write.csv(data_sum,"C:/Users/clmej/OneDrive - University of Puerto Rico/PhD/POC Project/Analysis/LaParguera_POC\\data_sum.csv", row.names=FALSE)
+write.csv(data_sum,"C:/Users/clmej/OneDrive - University of Puerto Rico/PhD/POC Project/Analysis/LaParguera_POC\\data_sum_AB6.csv", row.names=FALSE)
 
