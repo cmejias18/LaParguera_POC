@@ -53,11 +53,11 @@ precip14days <-
   precip %>% 
   mutate(Date = as.Date(Date, "%m/%d/%Y"))%>% 
   complete(Date = seq.Date(min(Date), max(Date), by="day")) %>% 
-  mutate(Rain_in_14days = sum_run(x = Rain_in, k = 14, idx = as.Date(Date, format = "%m/%d/%Y"))) 
+  mutate(Rain_cm_14days = sum_run(x = Rain_cm, k = 14, idx = as.Date(Date, format = "%m/%d/%Y"))) 
 
 
 data2 <- merge(data, precip14days, by.x = "Date", all.x = TRUE)%>% 
-  dplyr::select(-c(Month, MonthNo, Rain_in))
+  dplyr::select(-c(Month, MonthNo, Rain_in, Rain_cm))
 
 #Plot of Precipitation Rolling SumCum 14 days
 # Precip_plot <- ggplot(precip14days, aes(x = Date , y = Rain_in_14days)) + 
@@ -283,7 +283,7 @@ data_mean <- data2 %>%
             CN_M = mean(CN),
             CN_SD =sd(CN),
             TDepth = mean(Depth),
-            Precipitation = mean(Rain_in_14days),
+            Precipitation = mean(Rain_cm_14days),
             Lat = mean(Lat), 
             Lon = mean(Lon))
 data_mean$Site <- factor(data_mean$Site, level = c("BB", "NQ", "AB", "VL"))
@@ -328,7 +328,7 @@ SalGraph2 <- ggplot(data_mean, aes(x = Date , y = Sal, fill= Site, shape=Site)) 
     axis.ticks.x = element_blank())
 
 pHGraph2 <- ggplot(data_mean, aes(x = Date , y = pH, fill=Site, shape = Site)) + 
-  ggtitle("C")+
+  ggtitle("D")+
   geom_point(size=4) + 
   geom_line()+
   geom_errorbar(aes(ymin = pH, ymax = pH))+
@@ -339,26 +339,28 @@ pHGraph2 <- ggplot(data_mean, aes(x = Date , y = pH, fill=Site, shape = Site)) +
   scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
   #scale_y_continuous(limits = c(7.4, 8.4), breaks = seq(7.4, 8.4, by = 0.2))+
   theme(
-    axis.text.x = element_blank(),
+    legend.position= "top",
+    axis.text.x = element_text(size=16),
     axis.title.x = element_blank(),
     axis.title.y = element_text(size=15),
-    axis.text.y = element_text(size =15), 
-    axis.line.x = element_blank(),
-    axis.ticks.x = element_blank()) 
+    axis.text.y = element_text(size = 15))
+    #axis.ticks.x = element_blank())
 
 PRCPraph2 <- ggplot(data_mean, aes(x = Date, y = Precipitation)) +
-  ggtitle("D")+
+  ggtitle("C")+
   # geom_bar(stat="identity", fill="darkgray", width = 8)+
   geom_point(size = 4, color = "darkgray") +
   geom_line(color = "darkgreen")+
   theme_classic()+
-  labs(x = NULL, y = "Precipitation (in)") +
-  scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
+  labs(x = NULL, y = "Precipitation (cm)") +
+  #scale_x_date(limits = as.Date(c("2018-07-01", "2019-08-01"))) +
   theme(
-    legend.position= "top",
-    axis.text.x = element_text(size=16),
-    axis.title.x = element_blank(),
-    axis.title.y = element_text(size=16))
+    axis.text.x = element_blank(), 
+    axis.title.x = element_blank(), 
+    axis.title.y = element_text(size=14.5),
+    axis.text.y = element_text(size =15), 
+    axis.line.x = element_blank(),
+    axis.ticks.x = element_blank())
 
 POCGraph2 <- ggplot(data_mean, aes(x = Date , y = POC_M, fill=Site, shape = Site)) + 
   ggtitle("E")+
@@ -451,7 +453,7 @@ CNGraph2 <- ggplot(data_mean, aes(x = Date , y = CN_M, fill= Site, shape=Site)) 
     #axis.ticks.x = element_blank())
 
 
-TimeseriesPlot<-((TempGraph2/SalGraph2/pHGraph2/PRCPraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2/CNGraph2)) + plot_layout(guides='collect') &
+TimeseriesPlot<-((TempGraph2/SalGraph2/PRCPraph2/pHGraph2)|(POCGraph2/PONGraph2/CIRGraph2/NIRGraph2/CNGraph2)) + plot_layout(guides='collect') &
   theme(legend.position = "bottom",
         legend.title = element_text(size=16), 
         legend.text = element_text(size=16))
@@ -695,7 +697,7 @@ CN2=aov(CN_M~Month,data=data_mean) #Month as a predictor of Temp
 CN3=aov(CN_M~Site+Month,data=data_mean) #Site + Month as predictors of Temp
 CN4=aov(CN_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of Temp
 AIC(CN0,CN1,CN2,CN3,CN4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(CN3) #Site and Month are a significant predictor of Temp
+summary(CN1) #Site and Month are a significant predictor of Temp
 check_model(CN3) #model assumptions appear to be mostly okay here
 TukeyHSD(CN3, conf.level=.95) #BB Temp > AB Temp, NQ Temp > AB Temp, VL Temp < AB Temp, VL Temp < BB Temp, VL Temp < NQ Temp
 
@@ -759,9 +761,9 @@ models = list(Temperature=(temp3),
               d15N=(d15N4),
               "C:N" = (CN3))
 
-
+models
 #create table of best AIC model summaries
-modelsummary(models,estimate="{p.value}",statistic=NULL,output = "Tables2.docx",title = 'p-values and summary statistics are reported for the best AIC model selected for each parameter. All site-level p-values are relative to the Bioluminescent Bay Site and all month p-values are relative to January.')
+modelsummary(models,estimate="{p.value}",statistic=NULL,output = "Tables3.docx",title = 'p-values and summary statistics are reported for the best AIC model selected for each parameter. All site-level p-values are relative to the Bioluminescent Bay Site and all month p-values are relative to January.')
 
 
 #### 9. Computing correlation matrix####
@@ -819,15 +821,15 @@ ggplot()+
   geom_rect(aes(xmin=20 , xmax=45, ymin=-17, ymax=-9), color="#dbe6a8", fill="#dbe6a8",alpha=0.3) + #C3 Terrestrial Plants
   geom_rect(aes(xmin=7 , xmax=27, ymin=-25.1, ymax=-22), color="#c6d4be", fill="#c6d4be",alpha=0.3) + #Freshwater DOC
   geom_rect(aes(xmin=7 , xmax=27, ymin=-32, ymax=-26), color="#c8d7da", fill="#ffffff",alpha=0.3) + #Marine DOC
-  annotate("text", x = 40, y = -16, label= "C4 Terrestrial Plants", colour="black", fontface="bold", size=4)+
-  annotate("text", x = 40, y = -30, label= "C3 Terrestrial Plants", colour="black", fontface="bold", size=4)+
-  annotate("text", x = 24, y = -31, label= "Freshwater DOC", colour="black", fontface="bold", size=4)+
-  annotate("text", x = 4.4, y = -30, label= "Freshwater POC", colour="black", fontface="bold", size=4, angle = 90)+
-  annotate("text", x = 5.5, y = -27.5, label= "Freshwater Algae", colour="black", fontface="bold", size=4, angle = 90)+
-  annotate("text", x = 9.5, y = -20, label= "Marine POC", colour="black", fontface="bold", size=4, angle = 90)+
-  annotate("text", x = 7, y = -16.5, label= "Marine Algae", colour="black", fontface="bold", size=4)+
-  annotate("text", x = 4.8, y = -12.5, label= "Bacteria", colour="black", fontface="bold", size=4)+
-  annotate("text", x = 24, y = -24, label= "Marine DOC", colour="black", fontface="bold", size=4)+
+  annotate("text", x = 40, y = -16, label= "C4 Terrestrial Plants", colour="black", fontface="bold", size=5)+
+  annotate("text", x = 40, y = -30, label= "C3 Terrestrial Plants", colour="black", fontface="bold", size=5)+
+  annotate("text", x = 23, y = -31, label= "Freshwater DOC", colour="black", fontface="bold", size=5)+
+  annotate("text", x = 4.4, y = -30, label= "Freshwater POC", colour="black", fontface="bold", size=5, angle = 90)+
+  annotate("text", x = 5.5, y = -27.1, label= "Freshwater Algae", colour="black", fontface="bold", size=5, angle = 90)+
+  annotate("text", x = 9.5, y = -20, label= "Marine POC", colour="black", fontface="bold", size=5, angle = 90)+
+  annotate("text", x = 7, y = -16.5, label= "Marine Algae", colour="black", fontface="bold", size=5)+
+  annotate("text", x = 4.8, y = -12.5, label= "Bacteria", colour="black", fontface="bold", size=5)+
+  annotate("text", x = 24, y = -24, label= "Marine DOC", colour="black", fontface="bold", size=5)+
   xlab("C:N")+
   ylab(expression(paste(delta^{13}, "C (\u2030)")))+
   scale_x_continuous(expand=c(0,0),limits = c(0,45),breaks=seq(-100,100,5)) + 
@@ -841,4 +843,4 @@ ggplot()+
   guides(fill = guide_legend(override.aes = list(size = 5)))
 
 Source
-ggsave("Source_Rev.pdf", Source, width = 12, height = 7)
+ggsave("Source_Rev.pdf", Source, width = 12, height = 8)
