@@ -698,7 +698,7 @@ CN3=aov(CN_M~Site+Month,data=data_mean) #Site + Month as predictors of Temp
 CN4=aov(CN_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of Temp
 AIC(CN0,CN1,CN2,CN3,CN4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
 summary(CN1) #Site and Month are a significant predictor of Temp
-check_model(CN3) #model assumptions appear to be mostly okay here
+check_model(CN1) #model assumptions appear to be mostly okay here
 TukeyHSD(CN3, conf.level=.95) #BB Temp > AB Temp, NQ Temp > AB Temp, VL Temp < AB Temp, VL Temp < BB Temp, VL Temp < NQ Temp
 
 poc0=aov(POC_M~1,data=data_mean) #null model
@@ -759,7 +759,7 @@ models = list(Temperature=(temp3),
               PON=(PON1),
               d13C=(d13C1),
               d15N=(d15N4),
-              "C:N" = (CN3))
+              "C:N" = (CN1))
 
 models
 #create table of best AIC model summaries
