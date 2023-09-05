@@ -47,6 +47,8 @@ data <- read_csv("DB_AnalysisR_OutlierRemoved.csv", col_types = cols(`Sampling D
   subset(Date > "2018-01-01" & Date < "2019-12-31") %>% 
   replace_with_na_all(condition=~.x==-999)
 
+#Precipitation Data and Cumulative Sum Calculation (14 days)
+
 precip <- read_csv("Precip2018_2019.csv") 
 
 precip14days <-
@@ -59,25 +61,16 @@ precip14days <-
 data2 <- merge(data, precip14days, by.x = "Date", all.x = TRUE)%>% 
   dplyr::select(-c(Month, MonthNo, Rain_in, Rain_cm))
 
-#Plot of Precipitation Rolling SumCum 14 days
-# Precip_plot <- ggplot(precip14days, aes(x = Date , y = Rain_in_14days)) + 
-#   ggtitle("A")+
-#   geom_point(size = 4) + 
-#   theme_classic()+
-#   labs(x = "Date", y = "Precipitation (in)")
-#   #scale_x_date(limits = as.Date(c("2018-01-01", "2019-12-31")))
-# 
-# Precip_plot
 
 
 #### 3. Figure 1: Map & Stations ########
 
-register_google(key = 'AIzaSyBAkWwL25eBEQFJf4n9Rc2sKQbxSAqu7To')
+register_google(key = ...)
 
 cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#92c5de', "VL" = '#2166ac')
 
 
-##Zoom Out Map##
+##Zoom Out Map = Figure 1A##
 
 dataMap <- data %>% 
   dplyr::filter(Site =="VL"|
@@ -93,27 +86,10 @@ LPmap <- get_googlemap(c(lon = -67.04, lat = 17.92),
                        maptype = "satellite", 
                        force = FALSE)
 
-#LPmap <- ne_tiles(c(longitude = -67.04, latitude = 17.92),
-#                       zoom = 12, category="osm")
-
-
 
 F1<-ggmap(LPmap) +
   geom_rect(aes(xmin = -66.9810, xmax = -66.9625, ymin = 17.8640, ymax = 17.8652), colour = "white", fill = "white", linewidth = 0.5)+ 
   annotate("text", x = -66.9705, y = 17.86, label= "200 m", colour="white", fontface="bold", size=5)+
-  # ggsn::scalebar(x.min = -67.00, x.max = -66.97, y.min = 17.86, y.max = 17.89,
-  #                location = "bottomleft",
-  #                dist = 2000,
-  #                dist_unit = "m",
-  #                transform = TRUE,
-  #                model = "WGS84",
-  #                height = 0.15,
-  #                st.dist=0.2,
-  #                st.bottom= FALSE,
-  #                st.size = 6,
-  #                st.color = "white",
-  #                box.color = "black",
-  #                box.fill = c("black", "white"))+
   theme_classic()+
   ggtitle("A")+
   theme(
@@ -143,8 +119,8 @@ F1
 ggsave("LPMapRev.pdf", F1, width = 12, height = 7)
 
 
-##Zoom In Map##
-
+##Zoom In Map = Figure 1B##
+ 
 dataMapZoom <- data %>% 
   dplyr::filter(Site =="AB"|
                 Site == "NQ") %>% 
@@ -163,19 +139,6 @@ F2<-ggmap(LPmapzoom) +
   annotate("text", x = -67.0428, y = 17.9446, label= "200 m", colour="white", fontface="bold", size=5)+
   theme_classic()+
   ggtitle("B") +
-  # ggsn::scalebar(x.min = -67.045, x.max = -67.042, y.min = 17.945, y.max = 17.948,
-  #                location = "bottomright",
-  #                dist = 200,
-  #                dist_unit = "m",
-  #                transform = TRUE,
-  #                model = "WGS84",
-  #                height = 0.15,
-  #                st.dist=0.3,
-  #                st.bottom= FALSE,
-  #                st.size = 6,
-  #                st.color = "white",
-  #                box.color = "black",
-  #                box.fill = c("black", "white"))+
   theme(
     plot.title=element_text(size=20),
     axis.title.x = element_text(size = 22),
@@ -200,7 +163,7 @@ F2
 ggsave("LPMapZoomRev.pdf", F2, width = 12, height = 7)
 
 
-##BB Zoom In Map##
+##BB Zoom In Map = Figure 1C##
 
 dataMapZoomBB <- data %>% 
   dplyr::filter(Site =="BB") %>% 
@@ -219,19 +182,6 @@ F3<-ggmap(LPmapzoomBB) +
   annotate("text", x = -67.0096, y = 17.9660, label= "100 m", colour="white", fontface="bold", size=5)+
   theme_classic()+
   ggtitle("C") +
-  # ggsn::scalebar(x.min = -67.009, x.max = -67.012, y.min = 17.9662, y.max = 17.9670,
-  #                location = "bottomright",
-  #                dist = 100,
-  #                dist_unit = "m",
-  #                transform = TRUE,
-  #                model = "WGS84",
-  #                height = 0.35,
-  #                st.dist= 0.5,
-  #                st.bottom= FALSE,
-  #                st.size = 6,
-  #                st.color = "white",
-  #                box.color = "black",
-  #                box.fill = c("black", "white"))+
   theme(
     plot.title=element_text(size=20),
     axis.title.x = element_text(size = 22),
@@ -287,9 +237,9 @@ data_mean <- data2 %>%
             Lat = mean(Lat), 
             Lon = mean(Lon))
 data_mean$Site <- factor(data_mean$Site, level = c("BB", "NQ", "AB", "VL"))
-print(data_mean)
 
-#### 5. Figure 2: Timeseries Plot : Graph Mean & STDEV ########
+
+#### 5. Figure 2: Timeseries Plot ########
 
 TempGraph2 <- ggplot(data_mean, aes(x = Date , y = Temp, fill= Site, shape=Site)) + 
   ggtitle("A")+
@@ -464,7 +414,7 @@ TimeseriesPlot
 ggsave("ParameterTimeSeries_FinalRev.pdf", TimeseriesPlot, width = 12, height = 9)
 
 
-#### 6. Figure 3: Parameter Gradient (BoxPlot) Box Plot#### 
+#### 6. Figure 3: Parameter Gradient (BoxPlot)#### 
 
 TempBox<-ggplot(data_mean, mapping = aes(Site, Temp)) +  
   ggtitle("A")+
@@ -611,11 +561,10 @@ data_pca <- data2 %>%
     pH = mean(pH),
     "C:N" = mean(CN),
     Depth = mean(Depth),
-    Precipitation = Rain_in_14days)
+    Precipitation = Rain_cm_14days)
 data_pca$Site<-factor(data_pca$Site, c("BB", "NQ", "AB", "VL"))
 data_pca = na.omit(data_pca)
-#pca <- prcomp(data_pca[c(3:9)], center = TRUE, scale. = TRUE) #initial PCA
-pca <- prcomp(data_pca[c(3:12)], center = TRUE, scale. = TRUE) #to include C:N, Depth, and precipitation
+pca <- prcomp(data_pca[c(3:12)], center = TRUE, scale. = TRUE)
 
 pca
 summary(pca)
@@ -659,102 +608,99 @@ ggsave("PCA_Rev.pdf", PCAPlot, width = 13, height = 7)
 
 #### 8. Stats: ANOVA & Models ####
 
-data_mean$Month = substr(data_mean$Date,6,7) #ADD EXPLANATION HERE#
+data_mean$Month = substr(data_mean$Date,6,7) 
 
 temp0=aov(Temp~1,data=data_mean) #null model
-temp1=aov(Temp~Site,data=data_mean) #Site as a predictor of Temp
-temp2=aov(Temp~Month,data=data_mean) #Month as a predictor of Temp
-temp3=aov(Temp~Site+Month,data=data_mean) #Site + Month as predictors of Temp
-temp4=aov(Temp~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of Temp
-AIC(temp0,temp1,temp2,temp3,temp4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(temp3) #Site and Month are a significant predictor of Temp
-#check_model(temp3) #model assumptions appear to be mostly okay here
-TukeyHSD(temp3, conf.level=.95) #BB Temp > AB Temp, NQ Temp > AB Temp, VL Temp < AB Temp, VL Temp < BB Temp, VL Temp < NQ Temp
+temp1=aov(Temp~Site,data=data_mean) #Site as a predictor
+temp2=aov(Temp~Month,data=data_mean) #Month as a predictor
+temp3=aov(Temp~Site+Month,data=data_mean) #Site + Month as predictors
+temp4=aov(Temp~Site*Month,data=data_mean) #Site + Month + Interaction as predictors
+AIC(temp0,temp1,temp2,temp3,temp4) #AIC of all models included, lowest AIC is selected as the best model to fit the data
+summary(temp3) #Site and Month are a significant predictor
+check_model(temp3) #check selected model
+TukeyHSD(temp3, conf.level=.95)
 
 sal0=aov(Sal~1,data=data_mean) #null model
-sal1=aov(Sal~Site,data=data_mean) #Site as a predictor of sal
-sal2=aov(Sal~Month,data=data_mean) #Month as a predictor of sal
-sal3=aov(Sal~Site+Month,data=data_mean) #Site + Month as predictors of sal
-sal4=aov(Sal~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of sal
-AIC(sal0,sal1,sal2,sal3,sal4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(sal3) #Site and Month are a significant predictor of sal
-#check_model(sal3) #model assumptions appear to be mostly okay here
-TukeyHSD(sal3, conf.level=.95) #BB sal > AB sal, NQ sal > AB sal, VL sal < AB sal, VL sal < BB sal, VL sal < NQ sal
+sal1=aov(Sal~Site,data=data_mean) #Site as a predictor 
+sal2=aov(Sal~Month,data=data_mean) #Month as a predictor
+sal3=aov(Sal~Site+Month,data=data_mean) #Site + Month as predictors
+sal4=aov(Sal~Site*Month,data=data_mean) #Site + Month + Interaction as predictors
+AIC(sal0,sal1,sal2,sal3,sal4) #AIC of all models included, lowest AIC is selected as the best model to fit the data
+summary(sal3) #Site and Month are a significant predictor
+check_model(sal3) #check selected model
+TukeyHSD(sal3, conf.level=.95)
 
 pH0=aov(pH~1,data=data_mean) #null model
-pH1=aov(pH~Site,data=data_mean) #Site as a predictor of pH
-pH2=aov(pH~Month,data=data_mean) #Month as a predictor of pH
-pH3=aov(pH~Site+Month,data=data_mean) #Site + Month as predictors of pH
-pH4=aov(pH~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of pH
-AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, pH4 has the lowest AIC but Site:month is not significant so select pH3
-summary(pH3)#Site and Month are a significant predictor of pH
-#check_model(pH3) #model assumptions appear to be mostly okay here
-TukeyHSD(pH3, conf.level=.95) #BB pH > AB pH, NQ pH > AB pH, VL pH < AB pH, VL pH < BB pH, VL pH < NQ pH
+pH1=aov(pH~Site,data=data_mean) #Site as a predictor
+pH2=aov(pH~Month,data=data_mean) #Month as a predictor
+pH3=aov(pH~Site+Month,data=data_mean) #Site + Month as predictors
+pH4=aov(pH~Site*Month,data=data_mean) #Site + Month + Interaction as predictors
+AIC(pH0,pH1,pH2,pH3,pH4) #AIC of all models included, pH4 has the lowest AIC but Site:month interaction is not significant so select pH3
+summary(pH3)#Site and Month are a significant predictor
+check_model(pH3) #check selected model
+TukeyHSD(pH3, conf.level=.95) 
 
 CN0=aov(CN_M~1,data=data_mean) #null model
-CN1=aov(CN_M~Site,data=data_mean) #Site as a predictor of Temp
-CN2=aov(CN_M~Month,data=data_mean) #Month as a predictor of Temp
-CN3=aov(CN_M~Site+Month,data=data_mean) #Site + Month as predictors of Temp
-CN4=aov(CN_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of Temp
-AIC(CN0,CN1,CN2,CN3,CN4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(CN1) #Site and Month are a significant predictor of Temp
-check_model(CN1) #model assumptions appear to be mostly okay here
-TukeyHSD(CN3, conf.level=.95) #BB Temp > AB Temp, NQ Temp > AB Temp, VL Temp < AB Temp, VL Temp < BB Temp, VL Temp < NQ Temp
+CN1=aov(CN_M~Site,data=data_mean) #Site as a predictor
+CN2=aov(CN_M~Month,data=data_mean) #Month as a predictor
+CN3=aov(CN_M~Site+Month,data=data_mean) #Site + Month as predictors
+CN4=aov(CN_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors
+AIC(CN0,CN1,CN2,CN3,CN4) #AIC of all models included, lowest AIC is selected as the best model to fit the data
+summary(CN1) #Site is a significant predictor
+check_model(CN1) #check selected model
+TukeyHSD(CN1, conf.level=.95)
 
 poc0=aov(POC_M~1,data=data_mean) #null model
-poc1=aov(POC_M~Site,data=data_mean) #Site as a predictor of POC
-poc2=aov(POC_M~Month,data=data_mean) #Month as a predictor of POC
-poc3=aov(POC_M~Site+Month,data=data_mean) #Site + Month as predictors of POC
-poc4=aov(POC_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of POC
-AIC(poc0,poc1,poc2,poc3,poc4) #AIC of all models included, t1 has the lowest AIC and is the best model to fit the data
-summary(poc1) #Site is a significant predictor of POC
-check_model(poc1) #model assumptions appear to be mostly okay here
-TukeyHSD(poc1, conf.level=.95) #BB POC > AB POC, NQ POC < BB POC, VL POC < BB POC
+poc1=aov(POC_M~Site,data=data_mean) #Site as a predictor
+poc2=aov(POC_M~Month,data=data_mean) #Month as a predictor
+poc3=aov(POC_M~Site+Month,data=data_mean) #Site + Month as predictors
+poc4=aov(POC_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors
+AIC(poc0,poc1,poc2,poc3,poc4) #AIC of all models included, the lowest AIC is selected as the best model to fit the data
+summary(poc1) #Site is a significant predictor
+check_model(poc1) #check selected model
+TukeyHSD(poc1, conf.level=.95) 
 
 PON0=aov(PON_M~1,data=data_mean) #null model
-PON1=aov(PON_M~Site,data=data_mean) #Site as a predictor of PON
-PON2=aov(PON_M~Month,data=data_mean) #Month as a predictor of PON
-PON3=aov(PON_M~Site+Month,data=data_mean) #Site + Month as predictors of PON
-PON4=aov(PON_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of PON
-AIC(PON0,PON1,PON2,PON3,PON4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(PON1) #Site and Month are a significant predictor of PON
-check_model(PON1) #model assumptions appear to be mostly okay here
-TukeyHSD(PON1, conf.level=.95) #BB PON > AB PON, NQ PON > AB PON, VL PON < AB PON, VL PON < BB PON, VL PON < NQ PON
+PON1=aov(PON_M~Site,data=data_mean) #Site as a predictor
+PON2=aov(PON_M~Month,data=data_mean) #Month as a predictor
+PON3=aov(PON_M~Site+Month,data=data_mean) #Site + Month as predictors
+PON4=aov(PON_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors
+AIC(PON0,PON1,PON2,PON3,PON4) #AIC of all models included, the lowest AIC is selected as the best model to fit the data
+summary(PON1) #Site is a significant predictor
+check_model(PON1) #check selected model
+TukeyHSD(PON1, conf.level=.95)
 
 d13C0=aov(d13C_M~1,data=data_mean) #null model
-d13C1=aov(d13C_M~Site,data=data_mean) #Site as a predictor of d13C
-d13C2=aov(d13C_M~Month,data=data_mean) #Month as a predictor of d13C
-d13C3=aov(d13C_M~Site+Month,data=data_mean) #Site + Month as predictors of d13C
-d13C4=aov(d13C_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d13C
-AIC(d13C0,d13C1,d13C2,d13C3,d13C4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(d13C1) #Site and Month are a significant predictor of d13C
-check_model(d13C1) #model assumptions appear to be mostly okay here
-TukeyHSD(d13C1, conf.level=.95) #BB d13C > AB d13C, NQ d13C > AB d13C, VL d13C < AB d13C, VL d13C < BB d13C, VL d13C < NQ d13C
+d13C1=aov(d13C_M~Site,data=data_mean) #Site as a predictor
+d13C2=aov(d13C_M~Month,data=data_mean) #Month as a predictor
+d13C3=aov(d13C_M~Site+Month,data=data_mean) #Site + Month as predictors
+d13C4=aov(d13C_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors
+AIC(d13C0,d13C1,d13C2,d13C3,d13C4) #AIC of all models included, the lowest AIC is selected as the best model to fit the data
+summary(d13C1) #Site is a significant predictor
+check_model(d13C1) #check selected model
+TukeyHSD(d13C1, conf.level=.95) 
 
 d15N0=aov(d15N_M~1,data=data_mean) #null model
-d15N1=aov(d15N_M~Site,data=data_mean) #Site as a predictor of d15N
-d15N2=aov(d15N_M~Month,data=data_mean) #Month as a predictor of d15N
-d15N3=aov(d15N_M~Site+Month,data=data_mean) #Site + Month as predictors of d15N
-d15N4=aov(d15N_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors of d15N
-AIC(d15N0,d15N1,d15N2,d15N3,d15N4) #AIC of all models included, t3 has the lowest AIC and is the best model to fit the data
-summary(d15N4) #Site and Month are a significant predictor of d15N
-check_model(d15N4) #model assumptions appear to be mostly okay here
-TukeyHSD(d15N4, conf.level=.95) #BB d15N > AB d15N, NQ d15N > AB d15N, VL d15N < AB d15N, VL d15N < BB d15N, VL d15N < NQ d15N
+d15N1=aov(d15N_M~Site,data=data_mean) #Site as a predictor
+d15N2=aov(d15N_M~Month,data=data_mean) #Month as a predictor
+d15N3=aov(d15N_M~Site+Month,data=data_mean) #Site + Month as predictors
+d15N4=aov(d15N_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors
+AIC(d15N0,d15N1,d15N2,d15N3,d15N4) #AIC of all models included, the lowest AIC is selected as the best model to fit the data
+summary(d15N4) #Site:Month interaction are a significant predictors
+check_model(d15N4) #check selected model
+TukeyHSD(d15N4, conf.level=.95)
 
 ######## Adding code to export table of ANOVA model summaries
-#install packages
-install.packages("modelsummary")
-install.packages("htmltools")
-install.packages("flextable")
 
-#load libraries
+library(htmltools)
+library(flextable)
 library(modelsummary)
 #https://vincentarelbundock.github.io/modelsummary/articles/modelsummary.html
 
-#generate a list of best AIC model summaries
+#generate a list of best AIC model summaries (Table 1)
 models = list(Temperature=(temp3),
               Salinity=(sal3),
-              pH=(pH3), #please note, the interaction for model pH4 was not significant so I have removed it
+              pH=(pH3),
               POC=(poc1),
               PON=(PON1),
               d13C=(d13C1),
@@ -766,19 +712,7 @@ models
 modelsummary(models,estimate="{p.value}",statistic=NULL,output = "Tables3.docx",title = 'p-values and summary statistics are reported for the best AIC model selected for each parameter. All site-level p-values are relative to the Bioluminescent Bay Site and all month p-values are relative to January.')
 
 
-#### 9. Computing correlation matrix####
-correlation_matrix <- round(cor(as.data.frame(as.numeric(data_pca[complete.cases(data_pca[,2:8]),]))),1)
-
-# Computing correlation matrix with p-values
-corrp.mat <- cor_pmat(data_pca)
-
-# Visualizing the correlation matrix using
-# square and circle methods
-ggcorrplot(correlation_matrix, method ="square")
-ggcorrplot(correlation_matrix, method ="circle")
-
-
-####10. Data Summary Table ####
+####9. Data Summary = Table 2 ####
 
 data_sum <- data %>% 
   group_by(Site) %>% 
@@ -809,7 +743,7 @@ data_sum <- data %>%
 
 write.csv(data_sum,"C:/Users/clmej/OneDrive - University of Puerto Rico/PhD/POC Project/Analysis/LaParguera_POC\\data_sum_AB6.csv", row.names=FALSE)
 
-#### 11. POC SOURCE? #### Base figure adapted from Lamb et al. 2006 ####
+#### 10. Figure 5. POC SOURCE #### Base figure adapted from Lamb et al. 2006 ####
 Source <-
 ggplot()+
   geom_rect(aes(xmin=3.6 , xmax=6, ymin=-27, ymax=-12), color="#a6978c", fill="#a6978c",alpha=0.3) + #Bacteria
