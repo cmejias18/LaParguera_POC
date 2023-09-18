@@ -570,14 +570,16 @@ pca
 summary(pca)
 fviz_eig(pca)
 
-PCAPlot<-ggbiplot(pca, obs.scale = 2, var.scale = 2, size= 1, 
+PCAPlot<-ggbiplot(pca, obs.scale = 2, var.scale = 2, size= 1.5, 
                   group = data_pca$Site,
-                  varname.size=5,
+                  varname.size= 5.5,
+                  varname.adjust = 1.5,
+                  varname.dist= 2,
+                  label.repel = TRUE,
                   labels.size=5,
                   ellipse = TRUE, 
-                  circle = FALSE,
-                  label.repel = TRUE)+ 
-  geom_point(aes(shape=data_pca$Site,fill=data_pca$Site), size = 8)+
+                  circle = FALSE)+ 
+  geom_point(aes(shape=data_pca$Site,fill=data_pca$Site), size = 4.5)+
   scale_shape_manual(name="Site", values=c(21, 24, 23, 22))+
   scale_color_manual(name="Site", values=cols5) +
   scale_fill_manual(name="Site", values=cols5) +
@@ -603,7 +605,7 @@ PCAPlot$layers[[txt]]$aes_params$colour <- 'black'
 
 PCAPlot
 
-ggsave("PCA_Rev.pdf", PCAPlot, width = 13, height = 7)
+ggsave("PCA_Rev2.pdf", PCAPlot, width = 14, height = 8)
 
 
 #### 8. Stats: ANOVA & Models ####
