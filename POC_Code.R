@@ -1,3 +1,6 @@
+#This R Code is for the analysis of the data published in "Localized inshore warming, acidification, and elevated particulate organic matter across a coupled mangrove, seagrass, and coral reef ecosystem in La Parguera, Puerto Rico". 
+# Carla L. Mejias-Rivera
+# carla.mejias@upr.edu
 
 #### 1. Import libraries #####
 
@@ -64,6 +67,8 @@ data2 <- merge(data, precip14days, by.x = "Date", all.x = TRUE)%>%
 
 
 #### 3. Figure 1: Map & Stations ########
+
+#Replace the ellipsis in line 72 with your own Google API Key to reproduce the satellite maps for La Parguera area. 
 
 register_google(key='...')
 
@@ -689,7 +694,6 @@ d15N3=aov(d15N_M~Site+Month,data=data_mean) #Site + Month as predictors
 d15N4=aov(d15N_M~Site*Month,data=data_mean) #Site + Month + Interaction as predictors
 AIC(d15N0,d15N1,d15N2,d15N3,d15N4) #AIC of all models included, the lowest AIC is selected as the best model to fit the data
 summary(d15N4) #Site:Month interaction are a significant predictors
-check_model(d15N4) #check selected model
 TukeyHSD(d15N4, conf.level=.95)
 
 ######## Adding code to export table of ANOVA model summaries
@@ -743,7 +747,7 @@ data_sum <- data %>%
   dplyr::rename(PON = PONm) %>% 
   dplyr::rename(CN = CNm) 
 
-write.csv(data_sum,"C:/Users/clmej/OneDrive - University of Puerto Rico/PhD/POC Project/Analysis/LaParguera_POC\\data_sum_AB6.csv", row.names=FALSE)
+write.csv(data_sum,"data_sum_AB6.csv", row.names=FALSE)
 
 #### 10. Figure 5. POC SOURCE #### Base figure adapted from Lamb et al. 2006 ####
 Source <-
