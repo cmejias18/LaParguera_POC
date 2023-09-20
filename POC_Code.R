@@ -69,7 +69,6 @@ data2 <- merge(data, precip14days, by.x = "Date", all.x = TRUE)%>%
 #### 3. Figure 1: Map & Stations ########
 
 #Replace the ellipsis in line 72 with your own Google API Key to reproduce the satellite maps for La Parguera area. 
-
 register_google(key='...')
 
 cols5 <- c("BB" = '#b2162b', "NQ" = '#f4a582', "AB" = '#92c5de', "VL" = '#2166ac')
